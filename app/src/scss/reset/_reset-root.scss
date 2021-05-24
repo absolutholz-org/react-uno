@@ -1,0 +1,100 @@
+////
+/// Reboot root-level properties
+///
+/// @author absolutholz
+////
+
+/// Root background color
+/// @type Color
+/// @link https://edwardtufte.github.io/tufte-css/ from Tufte CSS by Dave Liepmann
+$root-background-color: #fffff8 !default;
+
+/// Root typography color
+/// @type Color
+/// @link https://edwardtufte.github.io/tufte-css/ from Tufte CSS by Dave Liepmann
+$root-typography-color: #11111a !default;
+
+/// Root typography weight
+/// @type Integer|String
+$root-typography-weight: normal !default;
+
+/// Root typography size
+/// @type String
+$root-typography-size: 1em !default;
+
+/// Root typography line height
+/// @type Number
+$root-typography-line-height: 1.5 !default;
+
+/// Root typography family (font stack)
+/// @type String|List
+$root-typography-stack: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Helvetica, Arial, sans-serif !default;
+
+/// Use momentum scrolling
+/// @type Boolean
+$root-momentum-scrolling: true !default;
+
+// Bootstrap 4 (beta) Reboot
+// BS1. Bootstrap 4 Reboot. I used to set the root box-sizing and let elements inherit the value, but this wasn't a very logical approach
+// BS2. Change the default font family in all browsers.
+// BS3. Correct the line height in all browsers.
+// BS4. Bootstrap 4 Reboot: Prevent adjustments of font size after orientation changes in IE on Windows Phone and in iOS.
+// BS5. Bootstrap 4 Reboot: Setting @viewport causes scrollbars to overlap content in IE11 and Edge, so we force a non-overlapping, non-auto-hiding scrollbar to counteract.
+// BS6. Bootstrap 4 Reboot: Change the default tap highlight to be completely transparent in iOS.
+// BS7. As a best practice, apply a default `background-color`. - Boostrap does this on body, but I prefer it on :root
+
+// Normalize 7.0.0
+// N2. Prevent adjustments of font size after orientation changes in IE on Windows Phone and in iOS.
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box; // BS1
+}
+
+// sass-lint:disable-block property-sort-order no-vendor-prefixes
+:root { // Interesting: :root = html, but has higher specificity
+	--root-surface: #{$root-background-color};
+	--root-on-surface: #{$root-typography-color};
+	--root-typo-weight: #{$root-typography-weight};
+	--root-typo-size: #{$root-typography-size};
+	--root-typo-line-height: #{$root-typography-line-height};
+	--root-typo-stack: #{$root-typography-stack};
+
+	--surface: var(--root-surface);
+	--on-surface: var(--root-on-surface);
+
+	// HTML5 Boilerplate sets a color (#222), font-size (1em) and line-height (1.4) here, but not a background-color
+	background: var(--root-surface); // BS7
+	color: var(--root-on-surface);
+	// BS2, BS3 - in scss customizable defaults, not sure why boostrap defines font-family and line-height (1.15) here
+	// and then overwrites them on the body (and not even in shorthand notation) - personal note, use em instead of rem
+	// for IE (if I remember correctly. Really doesn't matter since at this level 1em = 100% = 1rem)
+	font: var(--root-typo-weight) var(--root-typo-size) / var(--root-typo-line-height) var(--root-typo-stack);
+
+	-webkit-text-size-adjust: 100%; // BS4, N2
+	-ms-text-size-adjust: 100%; // BS4, N2
+	-ms-overflow-style: scrollbar; // BS5
+	@if ($root-momentum-scrolling) {
+		-webkit-overflow-scrolling: touch;
+	}
+	-webkit-tap-highlight-color: rgba(0, 0, 0, 0); // sass-lint:disable-line no-color-literals // BS6
+}
+
+// Bootstrap 4 (beta) Reboot
+// Make viewport responsive
+
+// @viewport is needed because IE 10+ doesn't honor <meta name="viewport"> in
+// some cases. See http:*timkadlec.com/2012/10/ie10-snap-mode-and-responsive-design/.
+// Eventually @viewport will replace <meta name="viewport">.
+
+// However, `device-width` is broken on IE 10 on Windows (Phone) 8,
+// (see http:*timkadlec.com/2013/01/windows-phone-8-and-device-width/ and https:*github.com/twbs/bootstrap/issues/10497)
+// and the fix for that involves a snippet of JavaScript to sniff the user agent
+// and apply some conditional CSS.
+
+// See http:*getbootstrap.com/getting-started/#support-ie10-width for the relevant hack.
+
+@viewport {
+	width: device-width;
+}

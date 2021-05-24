@@ -1,0 +1,52 @@
+// Reboot media elements (img, audio, video, iframe, canvas, svg)
+
+$full-width-responsive-images: false !default;
+$ie-img-svg-fix: true !default;
+
+// Bootstrap 4 (beta) Reboot
+// BS1. Remove the border on images inside links in IE 10-.
+// BS2. Hide the overflow in IE
+
+// Normalize 7.0.0
+// N1. Remove the border on images inside links in IE 10-.
+// N2. Hide the overflow in IE
+img {
+	border-style: none; // BS1, N1
+	@if ($full-width-responsive-images) {
+		height: auto;
+		max-width: 100%;
+		width: 100%;
+	}
+
+	// A (potential) IE fix for svgs scaling improperly:
+	// Sources:
+	//  - https://css-tricks.com/scale-svg/
+	//  - https://gist.github.com/larrybotha/7881691
+	@if ($ie-img-svg-fix and not $full-width-responsive-images) {
+		&[src$=".svg"] {
+			width: 100%;
+		}
+	}
+}
+
+// sass-lint:disable force-pseudo-nesting
+svg:not(:root) {
+	overflow: hidden; // BS2, N2
+}
+
+// HTML5 Boilerplate (and Bootstrap 4 Reboot for img)
+
+// Remove the gap between audio, canvas, iframes, , videos and the bottom of their containers:
+// https://github.com/h5bp/html5-boilerplate/issues/440
+audio,
+canvas,
+iframe,
+img,
+svg,
+video {
+	vertical-align: middle;
+}
+
+iframe {
+	border: 0; // suitcss
+}

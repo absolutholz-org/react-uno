@@ -1,0 +1,13 @@
+// Reboot the body node
+
+// Bootstrap 4 (beta) Reboot
+// BS1. Remove the margin in all browsers.
+// BS3. Set an explicit initial text-align value so that we can later use the `inherit` value on things like `<th>` elements.
+
+// Normalize 7.0.0
+// N1. Remove the margin in all browsers (opinionated).
+body {
+	margin: 0; // BS1, N1
+	min-height: 100%;
+	text-align: left; // BS3
+}

@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+
+  ui:
+    container_name: uno_ui
+    build:
+      context: .
+      dockerfile: ./docker-config/ui/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./app/src:/app/src
+      - ./app/public:/app/public
+      - ./app/package.json:/app/package.json
+      - ./app/yarn.lock:/app/yarn.lock
+      # - /node_modules
+    environment:
+      - NODE_ENV=development
+    command: ["yarn", "start" ]
+    # command: ["tail", "-f", "/dev/null"]

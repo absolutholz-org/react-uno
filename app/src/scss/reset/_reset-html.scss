@@ -1,0 +1,16 @@
+// Reboot the html node
+
+/// Always visible vertical window scrollbar
+/// @type Boolean
+$html-vertical-srollbar: true !default;
+
+// optionally append @content block to <body> selector
+html {
+	// Force scrollbars to always be visible to prevent awkward ‘jumps’ when
+	// navigating between pages that do/do not have enough content to produce
+	// scrollbars naturally.
+	height: 100%; // https://codepen.io/absolutholz/post/html-and-body-element-height-100
+	@if ($html-vertical-srollbar) {
+		overflow-y: scroll; // inuitCSS: https://github.com/inuitcss/inuitcss/blob/develop/elements/_elements.page.scss
+	}
+}
