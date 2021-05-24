@@ -1,17 +1,33 @@
+// react dependencies
 import React from 'react';
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
+// external dependencies
+import PubNub from 'pubnub';
+import { PubNubProvider } from 'pubnub-react';
+
+// internal components
 import Home from './pages/Home';
 
-import './scss/global.scss'
+// styles
+import './scss/global.scss';
+
+let uuid = localStorage.getItem('pubnub_uuid');
+if (!uuid) {
+	uuid = PubNub.generateUUID();
+	localStorage.setItem('pubnub_uuid', uuid);
+}
+
+const pubnub = new PubNub({
+	publishKey: process.env.REACT_APP_PUBNUB_PUBLISH_KEY,
+	subscribeKey: process.env.REACT_APP_PUBNUB_SUBSCRIBE_KEY,
+	uuid: uuid,
+});
 
 const App = () => {
 	return (
-		<Router>
-			<Switch>
-				<Route path="/" exact component={Home} />
-			</Switch>
-		</Router>
+		<PubNubProvider client={pubnub}>
+			<Home />
+		</PubNubProvider>
 	);
 };
 
