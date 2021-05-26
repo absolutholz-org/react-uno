@@ -4,6 +4,7 @@ WORKDIR /app
 
 COPY app/package*.json ./
 COPY app/yarn.lock ./
+COPY app/.env* .
 
 RUN yarn install && yarn cache clean
 
