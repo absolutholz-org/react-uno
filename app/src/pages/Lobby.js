@@ -12,9 +12,13 @@ import LobbyPlayerList from './../components/LobbyPlayerList';
 
 const MESSAGE_START_GAME = 'start-game';
 
+function createUuid (name, id) {
+	return `${ name }||${ id }`;
+}
+
 function objectifyUuid (uuid) {
-	const splitId = uuid.split('_');
-	const name = splitId[ splitId.length - 1 ];
+	const splitId = uuid.split('||');
+	const name = splitId[0];
 	return {
 		name,
 		uuid,
@@ -29,24 +33,18 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 	const [ isCreator, setIsCreator ] = useState(false);
 	const history = useHistory();
 
-// let uuid = localStorage.getItem('pubnub_uuid');
-// if (!uuid) {
-// 	uuid = PubNub.generateUUID();
-// 	localStorage.setItem('pubnub_uuid', uuid);
-// }
-
 	const createPlayer = (event) => {
 		event.preventDefault();
 		const name = event.target.querySelector('#creator_name').value;
-		const uuid = `${ nanoid(32) }_${ name }`;
-		console.log('create player', {
+		const id = event.target.querySelector('#creator_id').value;
+		const uuid = createUuid(name, id);
+		const player = {
 			name,
 			uuid,
-		});
-		setPlayer({
-			name,
-			uuid,
-		});
+		};
+		console.log('create player', player);
+		setPlayer(player);
+		window.localStorage.setItem(`pubnub-player-id`, uuid);
 	};
 
 	const inviteOpponent = () => {
@@ -75,6 +73,13 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 			});
 	};
 
+	// useEffect(() => {
+	// 	let uuid = localStorage.getItem('pubnub_uuid');
+	// 	if (!uuid) {
+	// 		localStorage.setItem('pubnub_uuid', nanoid(32));
+	// 	}
+	// });
+
 	// after player is created => initialize PubNub
 	useEffect(() => {
 		if (player) {
@@ -97,7 +102,10 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 					console.log('message listener', { message });
 
 					if (message.message.action === MESSAGE_START_GAME) {
+						console.log(isCreator)
+						window.sessionStorage.setItem(`uno-game-player-id-${ message.message.channelId }`, player.uuid);
 						window.sessionStorage.setItem(`uno-game-config-${ message.message.channelId }`, JSON.stringify(message.message.config));
+						// window.sessionStorage.setItem(`uno-game-host-${ message.message.channelId }`, isCreator);
 						history.push(`/game/${ message.message.channelId }`);
 					}
 				},
@@ -141,7 +149,7 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 				}
 			});
 		}
-	}, [ pubNub, lobbyChannel ]);
+	}, [ pubNub, lobbyChannel, history ]);
 
 	// Lobby is created; PubNub is available and player data has been entered => publish this information for other participants
 	useEffect(() => {
@@ -162,16 +170,17 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 		<LayoutWidthContainer>
 			{ !player &&
 				<form onSubmit={ createPlayer }>
+					<input id="creator_id" value={ nanoid(10) } type="hidden" />
 					<label htmlFor="creator_name">
 						<div>Name</div>
-						<input autoComplete="username" id="creator_name" maxLength="15" minLength="3" required type="text" />
+						<input autoComplete="username" id="creator_name" maxLength="15" minLength="3" name="name" required type="text" />
 					</label>
 					<button type="submit">Create</button>
 				</form>
 			}
 
 			{ isCreator &&
-				<div>You are the creator</div>
+				<div>You are the host</div>
 			}
 
 			{ players.length > 0 &&
