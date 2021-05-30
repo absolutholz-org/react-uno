@@ -5,23 +5,71 @@ import React, { useState, useEffect } from 'react';
 import { usePubNub } from 'pubnub-react';
 
 // internal scripts
-import { ACTION_DEAL } from './../pages/Game';
 
 // internal components
+import { ACTION_DEAL, ACTION_GAME_START, ACTION_CARD_PLAYED } from './../pages/Game';
+import PlayerPreviewList from './PlayerPreviewList';
 
-const GameGuest = ({ name, id, gameChannel }) => {
+const GameGuest = ({ name, id, gameChannel, players }) => {
 	const playerChannel = `${ gameChannel }-${ id }`;
 	const pubNub = usePubNub();
 
+	const [ unplayedCards, setUnplayedCards ] = useState([]);
+	const [ playedCards, setPlayedCards ] = useState([]);
+	const [ lastPlayedCard, setLastPlayedCard ] = useState(null);
 	const [ cards, setCards ] = useState([]);
+	// const [ currentPlayerId, setCurrentPlayerId ] = useState(null);
+	// const [ nextPlayerId, setNextPlayerId ] = useState(null);
+	// const [ currentPlayer, setCurrentPlayer ] = useState(false);
+	// const [ nextPlayer, setNextPlayer ] = useState(false);
+
+	const [ playerPreviews, setPlayerPreviews ] = useState(players);
+
+	// function takeCardFromDeck () {
+	// 	const cardsClone = [ ...unplayedCards ];
+	// 	const card = cardsClone.splice(0, 1);
+	// 	console.log({ card, cardsClone, playedCards });
+	// 	setPlayedCards((playedCards) => [ ...playedCards, card ]);
+	// }
+
+	// useEffect(() => {
+	// 	if (unplayedCards.length) {
+	// 		takeCardFromDeck();
+	// 	}
+	// }, [ unplayedCards ]);
+
+	// useEffect(() => {
+	// 	if (playedCards.length) {
+	// 		setLastPlayedCard(playedCards[playedCards.length - 1]);
+	// 		console.log(playedCards[playedCards.length - 1]);
+	// 	}
+	// }, [ playedCards ]);
+
+	// function updatePlayerPreviews (players, currentPlayerId, nextPlayerId) {
+	// 	setPlayerPreviews([ ...players ].map((player) => {
+	// 		player.isCurrent = player.uuid === currentPlayerId;
+	// 		player.isNext = player.uuid === nextPlayerId;
+	// 		console.log({ player });
+	// 		return player;
+	// 	}));
+	// }
 
 	useEffect(() => {
 		pubNub.addListener({
 			message: (message) => {
-				console.log('message listener', { message }, message.message.action, ACTION_DEAL);
-				if (message.message.action === ACTION_DEAL) {
-					console.log('message listener', message.message.cards, message.message.action);
+				if (message.message.action === ACTION_DEAL && message.channel === playerChannel) {
+					console.log('PLAYER message listener', { message });
 					setCards(message.message.cards);
+				}
+
+				if (message.message.action === ACTION_GAME_START && message.channel === gameChannel) {
+					const { deck, currentPlayerId, nextPlayerId, players } = message.message;
+					console.log('GAME message listener', { message }, currentPlayerId, id);
+					setUnplayedCards(deck);
+					// updatePlayerPreviews (players, currentPlayerId, nextPlayerId);
+					setPlayerPreviews(players);
+					// setCurrentPlayerId(currentPlayerId);
+					// setNextPlayerId(nextPlayerId);
 				}
 			},
 		});
@@ -29,22 +77,58 @@ const GameGuest = ({ name, id, gameChannel }) => {
 		pubNub.subscribe({ channels: [ gameChannel, playerChannel ] });
 	}, [ pubNub, gameChannel, playerChannel ]);
 
+	// function getNextPlayer () {
+	// 	const currentPlayerIndex = players.findIndex((player) => player.uuid === id);
+	// 	const nextPlayerIndex = currentPlayerIndex < players.length - 1 ? currentPlayerIndex + 1 : 0;
+	// 	return players[ nextPlayerIndex ];
+	// }
+
+	function onCardClicked (card) {
+		// pubNub
+		// 	.publish({
+		// 		channel: gameChannel,
+		// 		message: {
+		// 			action: ACTION_CARD_PLAYED,
+		// 			card,
+		// 			currentPlayerId: players[0].uuid,
+		// 			nextPlayerId: players[1].uuid,
+		// 		},
+		// 	});
+	}
+
 	return (
 		<section id={ id }>
 			<h3>{ name }</h3>
 			<section>
-				<h4>Cards</h4>
+				<h4>Deck of Cards</h4>
+				<h5>Deck ({ unplayedCards.length })</h5>
+				<h5>Current ({ playedCards.length })</h5>
+				{ lastPlayedCard &&
+					<div>
+						{ lastPlayedCard.color } -
+						{ lastPlayedCard.name }
+					</div>
+				}
+			</section>
+			<section>
+				<h4>Player Cards</h4>
 				<ul>
 					{
 						cards.map((card) => (
 							<li key={ card.id }>
-								<button>
-									{ card.color } - { card.name }
+								<button onClick={ () => onCardClicked(card) }>
+									{ card.color } { card.name }
 								</button>
 							</li>
 						))
 					}
 				</ul>
+			</section>
+			<section>
+				<h4>Players</h4>
+				<PlayerPreviewList
+					players={ playerPreviews }
+				/>
 			</section>
 		</section>
 	);

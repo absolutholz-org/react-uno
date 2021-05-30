@@ -15,8 +15,10 @@ const PlayerPreviewList = ({ players }) => {
 				players.map((player) => (
 					<li key={ player.uuid }>
 						<PlayerPreview
-							cardCount={ player.cards.length }
+							cardCount={ player.cardCount }
 							name={ player.name }
+							isCurrent={ player.isCurrent }
+							isNext={ player.isNext }
 						/>
 					</li>
 				))

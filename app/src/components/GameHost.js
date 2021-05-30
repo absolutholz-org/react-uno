@@ -1,5 +1,5 @@
 // react dependencies
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 
 // external dependencies
 import { usePubNub } from 'pubnub-react';
@@ -8,24 +8,16 @@ import { usePubNub } from 'pubnub-react';
 import { createDeck, shuffleCards, dealCards } from './../game-functions';
 
 // internal components
-import { ACTION_DEAL } from './../pages/Game';
+import { ACTION_DEAL, ACTION_GAME_START } from './../pages/Game';
 import GamePlayer from './GamePlayer';
 
 const GameHome = ({ name, id, gameChannel, players }) => {
 	const pubNub = usePubNub();
 	const fullCardDeck = createDeck();
 
-	// const [ playersWithCards, setPlayersWithCards ] = useState([ ...players ].map((player) => {
-	// 	return { ...player, cards: [] };
-	// }));
-	const [ deck, setDeck ] = useState([]);
-	const [ cards, setCards ] = useState([]);
-
-	let waitingForOccupants = [ ...players ].filter((occupant) => occupant.uuid !== id);
-
 	function deal () {
 		const { dealtCards, remainingCards } = dealCards(players.length, shuffleCards(fullCardDeck), 6);
-		setDeck(remainingCards);
+
 		players.forEach((player, index) => {
 			pubNub
 				.publish({
@@ -35,9 +27,25 @@ const GameHome = ({ name, id, gameChannel, players }) => {
 						cards: dealtCards[index],
 					},
 				});
-		});
-		console.log({ dealtCards, remainingCards });
+			});
+
+		pubNub
+			.publish({
+				channel: gameChannel,
+				message: {
+					action: ACTION_GAME_START,
+					deck: remainingCards,
+					players: players.map((player, index) => {
+						player.cardCount = 6;
+						player.isCurrent = index === 0;
+						player.isNext = index === 1;
+						return player;
+					}),
+				},
+			});
 	}
+
+	let waitingForOccupants = [ ...players ].filter((occupant) => occupant.uuid !== id);
 
 	function checkOccupancy (occupantId) {
 		waitingForOccupants = waitingForOccupants.filter((occupant) => occupant.uuid !== occupantId);
@@ -50,13 +58,12 @@ const GameHome = ({ name, id, gameChannel, players }) => {
 	useEffect(() => {
 		pubNub.addListener({
 			message: (message) => {
-				console.log('message listener', { message });
-				if (message.action === ACTION_DEAL) {
-					setCards(cards);
+				if (message.message.action === ACTION_GAME_START) {
+
 				}
 			},
 			presence: (message) => {
-				console.log('presence listener', { message });
+				console.log('HOST presence listener', { message });
 				if (message.action === 'join' && message.channel === gameChannel) {
 					checkOccupancy(message.uuid);
 				}
@@ -86,6 +93,7 @@ const GameHome = ({ name, id, gameChannel, players }) => {
 			id={ id }
 			name={ name }
 			gameChannel={ gameChannel }
+			players={ players }
 		/>
 	);
 };
