@@ -16,7 +16,7 @@ function createUuid (name, id) {
 	return `${ name }||${ id }`;
 }
 
-function objectifyUuid (uuid) {
+export function objectifyUuid (uuid) {
 	const splitId = uuid.split('||');
 	const name = splitId[0];
 	return {

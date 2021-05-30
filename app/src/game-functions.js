@@ -1,7 +1,7 @@
 import { shuffle } from './array-functions';
 
 export function createDeck () {
-	const deck = Array(4).fill({ value: 'wild' }).map((wildCard, index) => ({ ...wildCard, id: `wild-${ index }` }));
+	const deck = Array(4).fill({ name: 'wild' }).map((wildCard, index) => ({ ...wildCard, id: `wild-${ index }` }));
 
 	[ 'red', 'green', 'yellow', 'blue' ]
 		.forEach((color) => {
@@ -28,14 +28,14 @@ export function dealCards (playerCount, cards, cardsPerPlayer = 6) {
 	}
 
 	const dealtCards = new Array(playerCount);
-	const deck = [ ...cards ];
+	const remainingCards = [ ...cards ];
 
 	for (let iPlayer = 0; iPlayer < playerCount; iPlayer+=1) {
-		dealtCards[iPlayer] = deck.splice(0, cardsPerPlayer);
+		dealtCards[iPlayer] = remainingCards.splice(0, cardsPerPlayer);
 	}
 
 	return {
 		dealtCards,
-		deck,
+		remainingCards,
 	};
 }
