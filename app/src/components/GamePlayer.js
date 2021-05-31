@@ -24,6 +24,9 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 
 	const [ isCurrentPlayer, setIsCurrentPlayer ] = useState(false);
 
+	const [ lastPlayedColor, setLastPlayedColor ] = useState(null);
+	const [ lastPlayedName, setLastPlayedName ] = useState(null);
+
 	function takeCardFromDeck () {
 		const cardsClone = [ ...unplayedCards ];
 		const card = cardsClone.splice(0, 1);
@@ -33,6 +36,11 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 
 	useEffect(() => {
 		setIsPlayedCardsEmpty(playedCards.length < 1);
+		if (playedCards.length > 0) {
+			const lastPlayedCard = playedCards[playedCards.length - 1];
+			setLastPlayedColor(lastPlayedCard.color);
+			setLastPlayedName(lastPlayedCard.name);
+		}
 	}, [ playedCards ]);
 
 	useEffect(() => {
@@ -68,9 +76,21 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	function onCardClicked (card) {
 		console.log({ players, playerPreviews, card });
 
+		if (card.name === 'wild') {
+			const color = prompt('What color?');
+		}
+
+		if (card.color !== lastPlayedColor && card.name !== lastPlayedName) {
+			alert('nope');
+			return false;
+		}
+
 		const currentPlayerIndex = playerPreviews.findIndex((player) => player.isCurrent);
 		const nextPlayerIndex = playerPreviews.findIndex((player) => player.isNext);
 		const newNextPlayerIndex = nextPlayerIndex < playerPreviews.length - 1 ? nextPlayerIndex + 1 : 0;
+
+		const cardsClone = [ ...cards ].filter((cardClone) => cardClone.id !== card.id);
+		setCards(cardsClone);
 
 		console.log({ currentPlayerIndex, nextPlayerIndex, newNextPlayerIndex });
 
@@ -80,10 +100,10 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 				message: {
 					action: ACTION_CARD_PLAYED,
 					unplayedCards,
-					playedCards,
+					playedCards: [ ...playedCards, card ],
 					players: [ ...playerPreviews ].map((player, index) => {
 						if (player.uuid === id) {
-							player.cardCount = cards.length;
+							player.cardCount = cardsClone.length;
 						}
 						player.isCurrent = nextPlayerIndex === index;
 						player.isNext = newNextPlayerIndex === index;
