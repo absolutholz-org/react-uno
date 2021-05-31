@@ -62,9 +62,15 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 					setCards(message.message.cards);
 				}
 
+				if (message.message.action === ACTION_CARD_PLAYED && message.channel === gameChannel) {
+					const { players } = message.message;
+					console.log('CARD message listener', { message });
+					setPlayerPreviews(players);
+				}
+
 				if (message.message.action === ACTION_GAME_START && message.channel === gameChannel) {
-					const { deck, currentPlayerId, nextPlayerId, players } = message.message;
-					console.log('GAME message listener', { message }, currentPlayerId, id);
+					const { deck, players } = message.message;
+					console.log('GAME message listener', { message }, id);
 					setUnplayedCards(deck);
 					// updatePlayerPreviews (players, currentPlayerId, nextPlayerId);
 					setPlayerPreviews(players);
@@ -84,16 +90,31 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	// }
 
 	function onCardClicked (card) {
-		// pubNub
-		// 	.publish({
-		// 		channel: gameChannel,
-		// 		message: {
-		// 			action: ACTION_CARD_PLAYED,
-		// 			card,
-		// 			currentPlayerId: players[0].uuid,
-		// 			nextPlayerId: players[1].uuid,
-		// 		},
-		// 	});
+		console.log({ players, playerPreviews, card });
+
+		const currentPlayerIndex = playerPreviews.findIndex((player) => player.isCurrent);
+		const nextPlayerIndex = playerPreviews.findIndex((player) => player.isNext);
+		const newNextPlayerIndex = nextPlayerIndex < playerPreviews.length - 1 ? nextPlayerIndex + 1 : 0;
+
+		console.log({ currentPlayerIndex, nextPlayerIndex, newNextPlayerIndex });
+
+		pubNub
+			.publish({
+				channel: gameChannel,
+				message: {
+					action: ACTION_CARD_PLAYED,
+					unplayedCards,
+					playedCards,
+					players: [ ...playerPreviews ].map((player, index) => {
+						if (player.uuid === id) {
+							player.cardCount = cards.length;
+						}
+						player.isCurrent = nextPlayerIndex === index;
+						player.isNext = newNextPlayerIndex === index;
+						return player;
+					}),
+				},
+			});
 	}
 
 	return (
