@@ -16,43 +16,22 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 
 	const [ unplayedCards, setUnplayedCards ] = useState([]);
 	const [ playedCards, setPlayedCards ] = useState([]);
-	const [ lastPlayedCard, setLastPlayedCard ] = useState(null);
-	const [ cards, setCards ] = useState([]);
-	// const [ currentPlayerId, setCurrentPlayerId ] = useState(null);
-	// const [ nextPlayerId, setNextPlayerId ] = useState(null);
-	// const [ currentPlayer, setCurrentPlayer ] = useState(false);
-	// const [ nextPlayer, setNextPlayer ] = useState(false);
 
+	const [ cards, setCards ] = useState([]);
 	const [ playerPreviews, setPlayerPreviews ] = useState(players);
 
-	// function takeCardFromDeck () {
-	// 	const cardsClone = [ ...unplayedCards ];
-	// 	const card = cardsClone.splice(0, 1);
-	// 	console.log({ card, cardsClone, playedCards });
-	// 	setPlayedCards((playedCards) => [ ...playedCards, card ]);
-	// }
+	const [ isPlayedCardsEmpty, setIsPlayedCardsEmpty ] = useState(true);
 
-	// useEffect(() => {
-	// 	if (unplayedCards.length) {
-	// 		takeCardFromDeck();
-	// 	}
-	// }, [ unplayedCards ]);
+	function takeCardFromDeck () {
+		const cardsClone = [ ...unplayedCards ];
+		const card = cardsClone.splice(0, 1);
+		setPlayedCards((playedCards) => [ ...playedCards, card[0] ]);
+		setUnplayedCards(cardsClone);
+	}
 
-	// useEffect(() => {
-	// 	if (playedCards.length) {
-	// 		setLastPlayedCard(playedCards[playedCards.length - 1]);
-	// 		console.log(playedCards[playedCards.length - 1]);
-	// 	}
-	// }, [ playedCards ]);
-
-	// function updatePlayerPreviews (players, currentPlayerId, nextPlayerId) {
-	// 	setPlayerPreviews([ ...players ].map((player) => {
-	// 		player.isCurrent = player.uuid === currentPlayerId;
-	// 		player.isNext = player.uuid === nextPlayerId;
-	// 		console.log({ player });
-	// 		return player;
-	// 	}));
-	// }
+	useEffect(() => {
+		setIsPlayedCardsEmpty(playedCards.length < 1);
+	}, [ playedCards ]);
 
 	useEffect(() => {
 		pubNub.addListener({
@@ -72,22 +51,13 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 					const { deck, players } = message.message;
 					console.log('GAME message listener', { message }, id);
 					setUnplayedCards(deck);
-					// updatePlayerPreviews (players, currentPlayerId, nextPlayerId);
 					setPlayerPreviews(players);
-					// setCurrentPlayerId(currentPlayerId);
-					// setNextPlayerId(nextPlayerId);
 				}
 			},
 		});
 
 		pubNub.subscribe({ channels: [ gameChannel, playerChannel ] });
 	}, [ pubNub, gameChannel, playerChannel ]);
-
-	// function getNextPlayer () {
-	// 	const currentPlayerIndex = players.findIndex((player) => player.uuid === id);
-	// 	const nextPlayerIndex = currentPlayerIndex < players.length - 1 ? currentPlayerIndex + 1 : 0;
-	// 	return players[ nextPlayerIndex ];
-	// }
 
 	function onCardClicked (card) {
 		console.log({ players, playerPreviews, card });
@@ -124,12 +94,19 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 				<h4>Deck of Cards</h4>
 				<h5>Deck ({ unplayedCards.length })</h5>
 				<h5>Current ({ playedCards.length })</h5>
-				{ lastPlayedCard &&
-					<div>
-						{ lastPlayedCard.color } -
-						{ lastPlayedCard.name }
-					</div>
-				}
+				<ol>
+					{
+						playedCards.map((card) => (
+							<li key={ card.id }>
+								{ card.color } { card.name }
+							</li>
+						))
+					}
+				</ol>
+				<button
+					disabled={ !isPlayedCardsEmpty }
+					onClick={ takeCardFromDeck }
+				>Draw a card</button>
 			</section>
 			<section>
 				<h4>Player Cards</h4>
@@ -137,7 +114,10 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 					{
 						cards.map((card) => (
 							<li key={ card.id }>
-								<button onClick={ () => onCardClicked(card) }>
+								<button
+									disabled={ isPlayedCardsEmpty }
+									onClick={ () => onCardClicked(card) }
+								>
 									{ card.color } { card.name }
 								</button>
 							</li>
