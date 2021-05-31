@@ -22,6 +22,8 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 
 	const [ isPlayedCardsEmpty, setIsPlayedCardsEmpty ] = useState(true);
 
+	const [ isCurrentPlayer, setIsCurrentPlayer ] = useState(false);
+
 	function takeCardFromDeck () {
 		const cardsClone = [ ...unplayedCards ];
 		const card = cardsClone.splice(0, 1);
@@ -42,16 +44,20 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 				}
 
 				if (message.message.action === ACTION_CARD_PLAYED && message.channel === gameChannel) {
-					const { players } = message.message;
+					const { players, playedCards, unplayedCards } = message.message;
 					console.log('CARD message listener', { message });
 					setPlayerPreviews(players);
+					setIsCurrentPlayer((players.find((player) => player.isCurrent)).uuid === id);
+					setPlayedCards(playedCards);
+					setUnplayedCards(unplayedCards);
 				}
 
 				if (message.message.action === ACTION_GAME_START && message.channel === gameChannel) {
 					const { deck, players } = message.message;
-					console.log('GAME message listener', { message }, id);
+					console.log('GAME message listener', { message });
 					setUnplayedCards(deck);
 					setPlayerPreviews(players);
+					setIsCurrentPlayer((players.find((player) => player.isCurrent)).uuid === id);
 				}
 			},
 		});
@@ -104,7 +110,7 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 					}
 				</ol>
 				<button
-					disabled={ !isPlayedCardsEmpty }
+					disabled={ !isCurrentPlayer || !isPlayedCardsEmpty }
 					onClick={ takeCardFromDeck }
 				>Draw a card</button>
 			</section>
