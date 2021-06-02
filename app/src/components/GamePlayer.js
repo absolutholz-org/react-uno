@@ -7,7 +7,7 @@ import { usePubNub } from 'pubnub-react';
 // internal scripts
 
 // internal components
-import { ACTION_DEAL, ACTION_GAME_START, ACTION_TURN_CHANGE, ACTION_PLAYER_SKIP } from './../pages/Game';
+import { ACTION_DEAL, ACTION_GAME_START, ACTION_TURN_CHANGE, ACTION_GAME_END } from './../pages/Game';
 import PlayerPreviewList from './PlayerPreviewList';
 
 const GameGuest = ({ name, id, gameChannel, players }) => {
@@ -55,8 +55,8 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	}
 
 	function drawFirstCardOfGame () {
-		// const card = takeCardFromDeck(1)[0];
-		const card = { name:'skip', color: 'red', id: 'asdf1234' };
+		const card = takeCardFromDeck(1)[0];
+		// const card = { name:'skip', color: 'red', id: 'asdf1234' };
 		playCard(card);
 		if (card.name === 'skip') {
 			endTurn(playerPreviews, [ card ], cards);
@@ -69,12 +69,10 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 		setIsCurrentPlayer(isCurrent);
 		setPlayerPreviews(players);
 		setPlayedCards(playedCards);
-		console.log({unplayedCards});
 		setUnplayedCards(unplayedCards);
 	}
 
 	function endTurn (players, playedCards, cardsClone, skip = false) {
-		// const currentPlayerIndex = players.findIndex((player) => player.isCurrent);
 		let nextPlayerIndex = players.findIndex((player) => player.isNext);
 		let newNextPlayerIndex = nextPlayerIndex < players.length - 1 ? nextPlayerIndex + 1 : 0;
 
@@ -102,6 +100,20 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 			});
 	}
 
+	function endGame () {
+		pubNub
+			.publish({
+				channel: gameChannel,
+				message: {
+					action: ACTION_GAME_END,
+					players: [ ...players ].map((player) => {
+						player.isWinner = player.uuid === id;
+						return player;
+					}),
+				},
+			});
+	}
+
 	useEffect(() => {
 		setIsPlayedCardsEmpty(playedCards.length < 1);
 		if (playedCards.length > 0) {
@@ -110,50 +122,6 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 			setLastPlayedName(lastPlayedCard.name);
 		}
 	}, [ playedCards ]);
-
-	// useEffect(() => {
-	// 	setIsPlayedCardsEmpty(playedCards.length < 1);
-	// 	if (playedCards.length > 0) {
-	// 		// const lastPlayedCard = playedCards[playedCards.length - 1];
-	// 		// setLastPlayedColor(lastPlayedCard.color);
-	// 		// setLastPlayedName(lastPlayedCard.name);
-
-	// // 		if (isCurrentPlayer) {
-	// // 			if (lastPlayedCard.name === 'skip') {
-	// // 				console.log(`skip player ${ id }`);
-
-	// // 				const nextPlayerIndex = playerPreviews.findIndex((player) => player.isNext);
-	// // 				const newNextPlayerIndex = nextPlayerIndex < playerPreviews.length - 1 ? nextPlayerIndex + 1 : 0;
-
-	// // 				pubNub
-	// // 					.publish({
-	// // 						channel: gameChannel,
-	// // 						message: {
-	// // 							action: ACTION_PLAYER_SKIP,
-	// // 							players: [ ...playerPreviews ].map((player, index) => {
-	// // 								player.isCurrent = nextPlayerIndex === index;
-	// // 								player.isNext = newNextPlayerIndex === index;
-	// // 								return player;
-	// // 							}),
-	// // 							skipPlayerId: id,
-	// // 						},
-	// // 					});
-
-	// // 			} else if (lastPlayedCard.name === '+1') {
-	// // 				console.log(`player ${ id } takes 1 card`);
-	// // 				setCards((cards) => [ ...cards, ...takeCardFromDeck(1) ]);
-
-	// // 			} else if (lastPlayedCard.name === '+2') {
-	// // 				console.log(`player ${ id } takes 2 cards`);
-	// // 				setCards((cards) => [ ...cards, ...takeCardFromDeck(2) ]);
-	// // 			}
-	// // 		}
-	// 	}
-	// }, [ playedCards ]);
-
-	// useEffect(() => {
-	// 	setIsPlayableCardAvailable(lastPlayedName === 'wild' || cards.some((card) => card.color === lastPlayedColor || card.name === lastPlayedName || card.name === 'wild'));
-	// }, [ cards, lastPlayedColor, lastPlayedName ]);
 
 	useEffect(() => {
 		pubNub.addListener({
@@ -167,25 +135,26 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 					if (message.message.action === ACTION_TURN_CHANGE) {
 						console.log('CARD message listener', { message });
 						const { players, playedCards, unplayedCards } = message.message;
-						// if (!skip) {
-							startTurn(players, unplayedCards, playedCards);
-						// } else {
-						// 	if ((players.find((player) => player.isCurrent)).uuid === id) {
-						// 		skipTurn(players, playedCards);
-						// 	}
-						// }
-					}
+						startTurn(players, unplayedCards, playedCards);
 
-					if (message.message.action === ACTION_GAME_START) {
+					} else if (message.message.action === ACTION_GAME_START) {
 						console.log('GAME message listener', { message });
 						let { deck, players } = message.message;
 						startTurn(players, deck, []);
-					}
 
-					// if (message.message.action === ACTION_PLAYER_SKIP) {
-					// 	console.log('SKIP message listener', { message });
-					// 	const { players, skipPlayerId } = message.message;
-					// 	startTurn(players, unplayedCards, playedCards);
+					} else if (message.message.action === ACTION_GAME_END) {
+						console.log('GAME won!');
+						const { players } = message.message;
+
+						setIsCurrentPlayer(false);
+
+						const winningPlayer = players.find((player) => player.isWinner);
+						if (winningPlayer.uuid === id) {
+							alert('Congratulations, you won!');
+						} else {
+							alert('Sorry, you lost.');
+						}
+					}
 				}
 			},
 		});
@@ -219,7 +188,12 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 		const cardsClone = [ ...cards ].filter((cardClone) => cardClone.id !== card.id);
 		playCard(card);
 		setCards(cardsClone);
-		endTurn(playerPreviews, [ ...playedCards, card ], cardsClone, card.name === 'skip');
+
+		if (cardsClone.length) {
+			endTurn(playerPreviews, [ ...playedCards, card ], cardsClone, card.name === 'skip');
+		} else {
+			endGame();
+		}
 	}
 
 	return (
