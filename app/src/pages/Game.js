@@ -15,7 +15,8 @@ import { LayoutWidthContainer } from './../components/Layout';
 
 export const ACTION_DEAL = 'deal';
 export const ACTION_GAME_START = 'start-game';
-export const ACTION_CARD_PLAYED = 'card-played';
+export const ACTION_TURN_CHANGE = 'card-played';
+export const ACTION_PLAYER_SKIP = 'skip-player';
 
 const Game = ({ match: { params: { gameId } } }) => {
 	const gameChannel = `uno-game-${ gameId }`;

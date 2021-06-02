@@ -7,7 +7,7 @@ import { usePubNub } from 'pubnub-react';
 // internal scripts
 
 // internal components
-import { ACTION_DEAL, ACTION_GAME_START, ACTION_CARD_PLAYED } from './../pages/Game';
+import { ACTION_DEAL, ACTION_GAME_START, ACTION_TURN_CHANGE, ACTION_PLAYER_SKIP } from './../pages/Game';
 import PlayerPreviewList from './PlayerPreviewList';
 
 const GameGuest = ({ name, id, gameChannel, players }) => {
@@ -49,6 +49,7 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	function startGame () {
 		const cardsClone = [ ...unplayedCards ];
 		const card = cardsClone.splice(0, 1);
+		console.log({card});
 		if (card.name === 'wild') {
 			card.color = chooseColor();
 		}
@@ -63,6 +64,30 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 		setUnplayedCards(unplayedCards);
 	}
 
+	function endTurn (playedCards, cardsClone) {
+		const currentPlayerIndex = playerPreviews.findIndex((player) => player.isCurrent);
+		const nextPlayerIndex = playerPreviews.findIndex((player) => player.isNext);
+		const newNextPlayerIndex = nextPlayerIndex < playerPreviews.length - 1 ? nextPlayerIndex + 1 : 0;
+
+		pubNub
+			.publish({
+				channel: gameChannel,
+				message: {
+					action: ACTION_TURN_CHANGE,
+					unplayedCards,
+					playedCards,
+					players: [ ...playerPreviews ].map((player, index) => {
+						if (player.uuid === id) {
+							player.cardCount = cardsClone.length;
+						}
+						player.isCurrent = nextPlayerIndex === index;
+						player.isNext = newNextPlayerIndex === index;
+						return player;
+					}),
+				},
+			});
+	}
+
 	useEffect(() => {
 		setIsPlayedCardsEmpty(playedCards.length < 1);
 		if (playedCards.length > 0) {
@@ -73,6 +98,24 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 			if (isCurrentPlayer) {
 				if (lastPlayedCard.name === 'skip') {
 					console.log(`skip player ${ id }`);
+
+					const nextPlayerIndex = playerPreviews.findIndex((player) => player.isNext);
+					const newNextPlayerIndex = nextPlayerIndex < playerPreviews.length - 1 ? nextPlayerIndex + 1 : 0;
+
+					pubNub
+						.publish({
+							channel: gameChannel,
+							message: {
+								action: ACTION_PLAYER_SKIP,
+								players: [ ...playerPreviews ].map((player, index) => {
+									player.isCurrent = nextPlayerIndex === index;
+									player.isNext = newNextPlayerIndex === index;
+									return player;
+								}),
+								skipPlayerId: id,
+							},
+						});
+
 				} else if (lastPlayedCard.name === '+1') {
 					console.log(`player ${ id } takes 1 card`);
 					takeCardFromDeck(1);
@@ -96,16 +139,24 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 					setCards(message.message.cards);
 				}
 
-				if (message.message.action === ACTION_CARD_PLAYED && message.channel === gameChannel) {
-					console.log('CARD message listener', { message });
-					const { players, playedCards, unplayedCards } = message.message;
-					startTurn(players, unplayedCards, playedCards)
-				}
+				if (message.channel === gameChannel) {
+					if (message.message.action === ACTION_TURN_CHANGE) {
+						console.log('CARD message listener', { message });
+						const { players, playedCards, unplayedCards } = message.message;
+						startTurn(players, unplayedCards, playedCards);
+					}
 
-				if (message.message.action === ACTION_GAME_START && message.channel === gameChannel) {
-					console.log('GAME message listener', { message });
-					const { deck, players } = message.message;
-					startTurn(players, deck, [])
+					if (message.message.action === ACTION_GAME_START) {
+						console.log('GAME message listener', { message });
+						const { deck, players } = message.message;
+						startTurn(players, deck, []);
+					}
+
+					if (message.message.action === ACTION_PLAYER_SKIP) {
+						console.log('SKIP message listener', { message });
+						const { players, skipPlayerId } = message.message;
+						startTurn(players, unplayedCards, playedCards);
+					}
 				}
 			},
 		});
@@ -114,49 +165,43 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	}, [ pubNub, gameChannel, playerChannel ]);
 
 	function onCardClicked (card) {
-		console.log({ players, playerPreviews, card });
+		console.log({ card, lastPlayedColor, lastPlayedName });
 
 		if (!isCurrentPlayer) {
 			return false;
+		}
+
+		// if the first player draws a wild to begin the game, it has no color, and this is ok
+		if (lastPlayedColor) {
+			if (
+				card.name !== 'wild' &&
+				card.color !== lastPlayedColor &&
+				card.name !== lastPlayedName
+			) {
+				alert('nope');
+				return false;
+			}
 		}
 
 		if (card.name === 'wild') {
 			card.color = chooseColor();
 		}
 
-		console.log({ card, lastPlayedColor, lastPlayedName });
+		// if (lastPlayedName === 'wild' && !lastPlayedColor) {
+		// 	console.log('wild!');
+		// 	endTurn([ ...playedCards, playCard(card) ], cardsClone);
+		// 	return;
+		// }
 
-		if (card.name !== 'wild' && card.color !== lastPlayedColor && card.name !== lastPlayedName) {
-			alert('nope');
-			return false;
-		}
-
-		const currentPlayerIndex = playerPreviews.findIndex((player) => player.isCurrent);
-		const nextPlayerIndex = playerPreviews.findIndex((player) => player.isNext);
-		const newNextPlayerIndex = nextPlayerIndex < playerPreviews.length - 1 ? nextPlayerIndex + 1 : 0;
+		// if (!lastPlayedColor && card.name !== 'wild' && card.color !== lastPlayedColor && card.name !== lastPlayedName) {
+		// 	alert('nope');
+		// 	return false;
+		// }
 
 		const cardsClone = [ ...cards ].filter((cardClone) => cardClone.id !== card.id);
 		setCards(cardsClone);
 
-		console.log({ currentPlayerIndex, nextPlayerIndex, newNextPlayerIndex });
-
-		pubNub
-			.publish({
-				channel: gameChannel,
-				message: {
-					action: ACTION_CARD_PLAYED,
-					unplayedCards,
-					playedCards: [ ...playedCards, card ],
-					players: [ ...playerPreviews ].map((player, index) => {
-						if (player.uuid === id) {
-							player.cardCount = cardsClone.length;
-						}
-						player.isCurrent = nextPlayerIndex === index;
-						player.isNext = newNextPlayerIndex === index;
-						return player;
-					}),
-				},
-			});
+		endTurn([ ...playedCards, card ], cardsClone);
 	}
 
 	return (
