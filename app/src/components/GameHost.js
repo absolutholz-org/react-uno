@@ -57,11 +57,6 @@ const GameHome = ({ name, id, gameChannel, players }) => {
 
 	useEffect(() => {
 		pubNub.addListener({
-			message: (message) => {
-				if (message.message.action === ACTION_GAME_START) {
-
-				}
-			},
 			presence: (message) => {
 				console.log('HOST presence listener', { message });
 				if (message.action === 'join' && message.channel === gameChannel) {

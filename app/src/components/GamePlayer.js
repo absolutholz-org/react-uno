@@ -42,32 +42,46 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	function takeCardFromDeck (cardCount = 1) {
 		const cardsClone = [ ...unplayedCards ];
 		const cardsTaken = cardsClone.splice(0, cardCount);
-		setCards((cards) => [ ...cards, ...cardsTaken ]);
 		setUnplayedCards(cardsClone);
+		return cardsTaken;
 	}
 
-	function startGame () {
-		const cardsClone = [ ...unplayedCards ];
-		const card = cardsClone.splice(0, 1);
-		console.log({card});
-		if (card.name === 'wild') {
-			card.color = chooseColor();
+	function playCard (card) {
+		setPlayedCards((playedCards) => [ ...playedCards, card ]);
+	}
+
+	function drawCard () {
+		setCards((cards) => [ ...cards, ...takeCardFromDeck(1) ]);
+	}
+
+	function drawFirstCardOfGame () {
+		// const card = takeCardFromDeck(1)[0];
+		const card = { name:'skip', color: 'red', id: 'asdf1234' };
+		playCard(card);
+		if (card.name === 'skip') {
+			endTurn(playerPreviews, [ card ], cards);
+
 		}
-		setPlayedCards((playedCards) => [ ...playedCards, card[0] ]);
-		setUnplayedCards(cardsClone);
 	}
 
 	function startTurn (players, unplayedCards, playedCards = []) {
+		const isCurrent = (players.find((player) => player.isCurrent)).uuid === id
+		setIsCurrentPlayer(isCurrent);
 		setPlayerPreviews(players);
-		setIsCurrentPlayer((players.find((player) => player.isCurrent)).uuid === id);
 		setPlayedCards(playedCards);
+		console.log({unplayedCards});
 		setUnplayedCards(unplayedCards);
 	}
 
-	function endTurn (playedCards, cardsClone) {
-		const currentPlayerIndex = playerPreviews.findIndex((player) => player.isCurrent);
-		const nextPlayerIndex = playerPreviews.findIndex((player) => player.isNext);
-		const newNextPlayerIndex = nextPlayerIndex < playerPreviews.length - 1 ? nextPlayerIndex + 1 : 0;
+	function endTurn (players, playedCards, cardsClone, skip = false) {
+		// const currentPlayerIndex = players.findIndex((player) => player.isCurrent);
+		let nextPlayerIndex = players.findIndex((player) => player.isNext);
+		let newNextPlayerIndex = nextPlayerIndex < players.length - 1 ? nextPlayerIndex + 1 : 0;
+
+		if (skip) {
+			nextPlayerIndex = newNextPlayerIndex;
+			newNextPlayerIndex = nextPlayerIndex < players.length - 1 ? nextPlayerIndex + 1 : 0;
+		}
 
 		pubNub
 			.publish({
@@ -76,7 +90,7 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 					action: ACTION_TURN_CHANGE,
 					unplayedCards,
 					playedCards,
-					players: [ ...playerPreviews ].map((player, index) => {
+					players: [ ...players ].map((player, index) => {
 						if (player.uuid === id) {
 							player.cardCount = cardsClone.length;
 						}
@@ -94,42 +108,52 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 			const lastPlayedCard = playedCards[playedCards.length - 1];
 			setLastPlayedColor(lastPlayedCard.color);
 			setLastPlayedName(lastPlayedCard.name);
-
-			if (isCurrentPlayer) {
-				if (lastPlayedCard.name === 'skip') {
-					console.log(`skip player ${ id }`);
-
-					const nextPlayerIndex = playerPreviews.findIndex((player) => player.isNext);
-					const newNextPlayerIndex = nextPlayerIndex < playerPreviews.length - 1 ? nextPlayerIndex + 1 : 0;
-
-					pubNub
-						.publish({
-							channel: gameChannel,
-							message: {
-								action: ACTION_PLAYER_SKIP,
-								players: [ ...playerPreviews ].map((player, index) => {
-									player.isCurrent = nextPlayerIndex === index;
-									player.isNext = newNextPlayerIndex === index;
-									return player;
-								}),
-								skipPlayerId: id,
-							},
-						});
-
-				} else if (lastPlayedCard.name === '+1') {
-					console.log(`player ${ id } takes 1 card`);
-					takeCardFromDeck(1);
-				} else if (lastPlayedCard.name === '+2') {
-					console.log(`player ${ id } takes 2 cards`);
-					takeCardFromDeck(2);
-				}
-			}
 		}
 	}, [ playedCards ]);
 
-	useEffect(() => {
-		setIsPlayableCardAvailable(lastPlayedName === 'wild' || cards.some((card) => card.color === lastPlayedColor || card.name === lastPlayedName || card.name === 'wild'));
-	}, [ cards, lastPlayedColor, lastPlayedName ]);
+	// useEffect(() => {
+	// 	setIsPlayedCardsEmpty(playedCards.length < 1);
+	// 	if (playedCards.length > 0) {
+	// 		// const lastPlayedCard = playedCards[playedCards.length - 1];
+	// 		// setLastPlayedColor(lastPlayedCard.color);
+	// 		// setLastPlayedName(lastPlayedCard.name);
+
+	// // 		if (isCurrentPlayer) {
+	// // 			if (lastPlayedCard.name === 'skip') {
+	// // 				console.log(`skip player ${ id }`);
+
+	// // 				const nextPlayerIndex = playerPreviews.findIndex((player) => player.isNext);
+	// // 				const newNextPlayerIndex = nextPlayerIndex < playerPreviews.length - 1 ? nextPlayerIndex + 1 : 0;
+
+	// // 				pubNub
+	// // 					.publish({
+	// // 						channel: gameChannel,
+	// // 						message: {
+	// // 							action: ACTION_PLAYER_SKIP,
+	// // 							players: [ ...playerPreviews ].map((player, index) => {
+	// // 								player.isCurrent = nextPlayerIndex === index;
+	// // 								player.isNext = newNextPlayerIndex === index;
+	// // 								return player;
+	// // 							}),
+	// // 							skipPlayerId: id,
+	// // 						},
+	// // 					});
+
+	// // 			} else if (lastPlayedCard.name === '+1') {
+	// // 				console.log(`player ${ id } takes 1 card`);
+	// // 				setCards((cards) => [ ...cards, ...takeCardFromDeck(1) ]);
+
+	// // 			} else if (lastPlayedCard.name === '+2') {
+	// // 				console.log(`player ${ id } takes 2 cards`);
+	// // 				setCards((cards) => [ ...cards, ...takeCardFromDeck(2) ]);
+	// // 			}
+	// // 		}
+	// 	}
+	// }, [ playedCards ]);
+
+	// useEffect(() => {
+	// 	setIsPlayableCardAvailable(lastPlayedName === 'wild' || cards.some((card) => card.color === lastPlayedColor || card.name === lastPlayedName || card.name === 'wild'));
+	// }, [ cards, lastPlayedColor, lastPlayedName ]);
 
 	useEffect(() => {
 		pubNub.addListener({
@@ -143,20 +167,25 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 					if (message.message.action === ACTION_TURN_CHANGE) {
 						console.log('CARD message listener', { message });
 						const { players, playedCards, unplayedCards } = message.message;
-						startTurn(players, unplayedCards, playedCards);
+						// if (!skip) {
+							startTurn(players, unplayedCards, playedCards);
+						// } else {
+						// 	if ((players.find((player) => player.isCurrent)).uuid === id) {
+						// 		skipTurn(players, playedCards);
+						// 	}
+						// }
 					}
 
 					if (message.message.action === ACTION_GAME_START) {
 						console.log('GAME message listener', { message });
-						const { deck, players } = message.message;
+						let { deck, players } = message.message;
 						startTurn(players, deck, []);
 					}
 
-					if (message.message.action === ACTION_PLAYER_SKIP) {
-						console.log('SKIP message listener', { message });
-						const { players, skipPlayerId } = message.message;
-						startTurn(players, unplayedCards, playedCards);
-					}
+					// if (message.message.action === ACTION_PLAYER_SKIP) {
+					// 	console.log('SKIP message listener', { message });
+					// 	const { players, skipPlayerId } = message.message;
+					// 	startTurn(players, unplayedCards, playedCards);
 				}
 			},
 		});
@@ -187,21 +216,10 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 			card.color = chooseColor();
 		}
 
-		// if (lastPlayedName === 'wild' && !lastPlayedColor) {
-		// 	console.log('wild!');
-		// 	endTurn([ ...playedCards, playCard(card) ], cardsClone);
-		// 	return;
-		// }
-
-		// if (!lastPlayedColor && card.name !== 'wild' && card.color !== lastPlayedColor && card.name !== lastPlayedName) {
-		// 	alert('nope');
-		// 	return false;
-		// }
-
 		const cardsClone = [ ...cards ].filter((cardClone) => cardClone.id !== card.id);
+		playCard(card);
 		setCards(cardsClone);
-
-		endTurn([ ...playedCards, card ], cardsClone);
+		endTurn(playerPreviews, [ ...playedCards, card ], cardsClone, card.name === 'skip');
 	}
 
 	return (
@@ -220,15 +238,18 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 						))
 					}
 				</ol>
-				{ isPlayedCardsEmpty && isCurrentPlayer &&
+				{ isPlayedCardsEmpty &&
 					<button
-						onClick={ startGame }
+						disabled={ !isCurrentPlayer }
+						onClick={ drawFirstCardOfGame }
 					>Start the game</button>
 				}
-				<button
-					disabled={ cardsDrawnThisTurn > 0 || !isCurrentPlayer || isPlayableCardAvailable || isPlayedCardsEmpty }
-					onClick={ () => takeCardFromDeck(1) }
-				>Draw a card</button>
+				{ !isPlayedCardsEmpty &&
+					<button
+						disabled={ cardsDrawnThisTurn > 0 || !isCurrentPlayer || isPlayableCardAvailable || isPlayedCardsEmpty }
+						onClick={ drawCard }
+					>Draw a card</button>
+				}
 			</section>
 			<section>
 				<h4>Player Cards</h4>
@@ -238,6 +259,7 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 							<li key={ card.id }>
 								<button
 									disabled={ !isCurrentPlayer || isPlayedCardsEmpty }
+									id={ card.id }
 									onClick={ () => onCardClicked(card) }
 								>
 									{ card.color } { card.name }
