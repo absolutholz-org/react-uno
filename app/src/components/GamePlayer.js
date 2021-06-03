@@ -22,12 +22,11 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 
 	const [ isCurrentPlayer, setIsCurrentPlayer ] = useState(false);
 	const [ isPlayedCardsEmpty, setIsPlayedCardsEmpty ] = useState(true);
-	const [ isPlayableCardAvailable, setIsPlayableCardAvailable ] = useState(false);
 
 	const [ lastPlayedColor, setLastPlayedColor ] = useState(null);
 	const [ lastPlayedName, setLastPlayedName ] = useState(null);
 
-	const [ cardsDrawnThisTurn, setCardsDrawnThisTurn ] = useState(0);
+	const [ cardsToDraw, setCardsToDraw ] = useState(0);
 
 	function chooseColor () {
 		const colors = [ 'red', 'yellow', 'blue', 'green' ];
@@ -55,17 +54,23 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	}
 
 	function drawFirstCardOfGame () {
-		const card = takeCardFromDeck(1)[0];
-		// const card = { name:'skip', color: 'red', id: 'asdf1234' };
+		// const card = takeCardFromDeck(1)[0];
+		const card = { name:'+2', color: 'red', id: 'asdf1234' };
 		playCard(card);
+
 		if (card.name === 'skip') {
 			endTurn(playerPreviews, [ card ], cards);
 
+		} else if (card.name === '+1') {
+			setCards((cards) => [ ...cards, ...takeCardFromDeck(1) ]);
+
+		} else if (card.name === '+2') {
+			setCards((cards) => [ ...cards, ...takeCardFromDeck(2) ]);
 		}
 	}
 
 	function startTurn (players, unplayedCards, playedCards = []) {
-		const isCurrent = (players.find((player) => player.isCurrent)).uuid === id
+		const isCurrent = (players.find((player) => player.isCurrent)).uuid === id;
 		setIsCurrentPlayer(isCurrent);
 		setPlayerPreviews(players);
 		setPlayedCards(playedCards);
@@ -124,6 +129,14 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	}, [ playedCards ]);
 
 	useEffect(() => {
+		if (cards.length && cardsToDraw) {
+			console.log(`player ${ id } takes ${ cardsToDraw } card`);
+			setCards((cards) => [ ...cards, ...takeCardFromDeck(cardsToDraw) ]);
+			setCardsToDraw(0);
+		}
+	}, [ cards, cardsToDraw ]);
+
+	useEffect(() => {
 		pubNub.addListener({
 			message: (message) => {
 				if (message.message.action === ACTION_DEAL && message.channel === playerChannel) {
@@ -133,9 +146,20 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 
 				if (message.channel === gameChannel) {
 					if (message.message.action === ACTION_TURN_CHANGE) {
-						console.log('CARD message listener', { message });
+						console.log('TURN message listener', { message });
 						const { players, playedCards, unplayedCards } = message.message;
 						startTurn(players, unplayedCards, playedCards);
+
+						if ((players.find((player) => player.isCurrent)).uuid === id) {
+							if (playedCards[playedCards.length - 1].name === '+1') {
+								console.log(`player ${ id } takes 1 card`);
+								setCardsToDraw(1);
+
+							} else if (playedCards[playedCards.length - 1].name === '+2') {
+								console.log(`player ${ id } takes 2 cards`);
+								setCardsToDraw(2);
+							}
+						}
 
 					} else if (message.message.action === ACTION_GAME_START) {
 						console.log('GAME message listener', { message });
@@ -220,7 +244,7 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 				}
 				{ !isPlayedCardsEmpty &&
 					<button
-						disabled={ cardsDrawnThisTurn > 0 || !isCurrentPlayer || isPlayableCardAvailable || isPlayedCardsEmpty }
+						disabled={ !isCurrentPlayer || isPlayedCardsEmpty }
 						onClick={ drawCard }
 					>Draw a card</button>
 				}
