@@ -16,12 +16,6 @@ const UnplayedCardPile = ({ cards }) => {
 						{ index === array.length - 1 &&
 							<UnoCardBack />
 						}
-						{/* { array.length - 1 === index &&
-							// <UnoCard
-							// 	value={ card.name }
-							// 	modifier={ card.color }
-							// />
-						} */}
 					</li>
 				))
 			}

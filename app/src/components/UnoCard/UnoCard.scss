@@ -37,15 +37,6 @@
 			transform: skewX(-16deg);
 			z-index: -1;
 		}
-
-
-	// 	// > * {
-	// 	// 	bottom: 0;
-	// 	// 	left: 0;
-	// 	// 	position: absolute;
-	// 	// 	right: 0;
-	// 	// 	top: 0;
-	// 	// }
 	}
 
 	&__symbol {
@@ -115,25 +106,6 @@
 		}
 	}
 
-
-	// &--color-2 {
-	// 	.uno-card__content {
-	// 		background: var(--card-color-1);
-	// 	}
-	// }
-
-	// &--color-3 {
-	// 	.uno-card__content {
-	// 		background: var(--card-color-2);
-	// 	}
-	// }
-
-	// &--color-4 {
-	// 	.uno-card__content {
-	// 		background: var(--card-color-3);
-	// 	}
-	// }
-
 	// &[data-value="skip"] {
 	// 	.uno-card__symbol {
 	// 		font-size: 2.5rem;
@@ -149,21 +121,6 @@
 	// }
 
 	// &--wild {
-	// 	.uno-card__content {
-	// 		background: #111;
-
-	// 		&::before {
-	// 			background: conic-gradient(
-	// 				$blue 0 90deg,
-	// 				$green 90deg 180deg,
-	// 				$yellow 180deg 270deg,
-	// 				$red 270deg
-	// 			);
-	// 			border: 7px solid #fff;
-	// 			content: "";
-	// 		}
-	// 	}
-
 	// 	.uno-card__symbol {
 	// 		&::before {
 	// 			background: conic-gradient(

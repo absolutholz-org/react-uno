@@ -58,7 +58,8 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	function drawFirstCardOfGame () {
 		const card = takeCardFromDeck(1)[0];
 		// const card = { name:'wild', id: 'asdf1234' };
-		// const card = { name:'+2', color: 'red', id: 'asdf1234' };
+		// const card = { name:'+2', color: '1', id: 'asdf1234' };
+		// const card = { name:'skip', color: '1', id: 'asdf1234' };
 		playCard(card);
 
 		if (card.name === 'skip') {
