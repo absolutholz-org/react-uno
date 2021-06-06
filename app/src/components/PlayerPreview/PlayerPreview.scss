@@ -1,3 +1,41 @@
 .player-preview {
+	border: 2px solid #a1a1a1;
+	border-radius: 4px;
+	// min-width: 0;
+	padding: 0.5rem 1rem;
+	position: relative;
 
+	&--current {
+		border-color: forestgreen;
+
+		.player-preview__turn-marker {
+			background: forestgreen;
+			border: 0;
+			color: white;
+		}
+	}
+
+	&--next {
+
+	}
+
+	&__turn-marker {
+		border: 2px solid #a1a1a1;
+		border-radius: 4px 4px 0 0;
+		bottom: 100%;
+		font-size: 0.875rem;
+		left: 1rem;
+		line-height: 1;
+		padding: 0.25rem 0.75rem;
+		position: absolute;
+		text-transform: uppercase;
+	}
+
+	&__hdln {
+		margin: 0 0 0.5rem 0;
+		// max-width: 100%;
+		// overflow: hidden;
+		// text-overflow: ellipsis;
+		// white-space: nowrap;
+	}
 }

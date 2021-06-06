@@ -1,12 +1,11 @@
 // react dependencies
 import React from 'react';
 
-// external dependencies
-
-// internal scripts
-
 // internal components
 import PlayerPreview from './../PlayerPreview';
+
+// styles
+import './PlayerPreviewList.scss';
 
 const PlayerPreviewList = ({ players }) => {
 	return (

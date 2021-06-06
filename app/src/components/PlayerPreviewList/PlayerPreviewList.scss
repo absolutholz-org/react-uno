@@ -1,3 +1,7 @@
 .player-preview-list {
-
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	list-style: none;
+	gap: 1rem;
+	padding-left: 0;
 }
