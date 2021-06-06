@@ -1,0 +1,13 @@
+.uno-card-symbol-wild {
+	background: conic-gradient(
+		var(--card-color-1) 0 90deg,
+		var(--card-color-2) 90deg 180deg,
+		var(--card-color-3) 180deg 270deg,
+		var(--card-color-4) 270deg
+	);
+	border: 2px solid #fff;
+	border-radius: 50%;
+	height: 1em;
+	margin: 0.1em;
+	width: calc((56 / 87) * 2rem);
+}
