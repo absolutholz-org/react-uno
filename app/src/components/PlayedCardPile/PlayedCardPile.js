@@ -11,12 +11,14 @@ const PlayedCardPile = ({ cards }) => {
 	return (
 		<ol className="played-card-pile">
 			{
-				cards.map((card) => (
+				cards.map((card, index, array) => (
 					<li key={ card.id }>
-						<UnoCardFront
-							cardType={ card.name }
-							cardColor={ card.color }
-						/>
+						{ index === array.length - 1 &&
+							<UnoCardFront
+								cardType={ card.name }
+								cardColor={ card.color }
+							/>
+						}
 					</li>
 				))
 			}
