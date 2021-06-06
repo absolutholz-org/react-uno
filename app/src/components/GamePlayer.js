@@ -9,6 +9,8 @@ import { usePubNub } from 'pubnub-react';
 // internal components
 import { ACTION_DEAL, ACTION_GAME_START, ACTION_TURN_CHANGE, ACTION_GAME_END } from './../pages/Game';
 import PlayerPreviewList from './PlayerPreviewList';
+import UnoCardPiles from './UnoCardPiles';
+import VisuallyHidden from './VisuallyHidden';
 
 const GameGuest = ({ name, id, gameChannel, players }) => {
 	const playerChannel = `${ gameChannel }-${ id }`;
@@ -54,8 +56,9 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	}
 
 	function drawFirstCardOfGame () {
-		// const card = takeCardFromDeck(1)[0];
-		const card = { name:'+2', color: 'red', id: 'asdf1234' };
+		const card = takeCardFromDeck(1)[0];
+		// const card = { name:'wild', id: 'asdf1234' };
+		// const card = { name:'+2', color: 'red', id: 'asdf1234' };
 		playCard(card);
 
 		if (card.name === 'skip') {
@@ -222,20 +225,14 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 
 	return (
 		<section id={ id }>
-			<h3>{ name }</h3>
 			<section>
-				<h4>Deck of Cards</h4>
-				<h5>Deck ({ unplayedCards.length })</h5>
-				<h5>Current ({ playedCards.length })</h5>
-				<ol>
-					{
-						playedCards.map((card) => (
-							<li key={ card.id }>
-								{ card.color } { card.name }
-							</li>
-						))
-					}
-				</ol>
+				<VisuallyHidden>
+					<h3>Deck of Cards</h3>
+				</VisuallyHidden>
+				<UnoCardPiles
+					unplayedCards={ unplayedCards }
+					playedCards={ playedCards }
+				/>
 				{ isPlayedCardsEmpty &&
 					<button
 						disabled={ !isCurrentPlayer }
@@ -250,7 +247,7 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 				}
 			</section>
 			<section>
-				<h4>Player Cards</h4>
+				<h3>Player Cards</h3>
 				<ul>
 					{
 						cards.map((card) => (

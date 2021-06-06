@@ -1,0 +1,16 @@
+.unplayed-card-pile {
+	height: 100%;
+	list-style: none;
+	margin: 0;
+	padding-left: 0;
+	position: relative;
+	width: 100%;
+
+	> li {
+		height: 100%;
+		left: 0;
+		position: absolute;
+		top: 0;
+		width: 100%;
+	}
+}

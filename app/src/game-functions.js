@@ -3,7 +3,7 @@ import { shuffle } from './array-functions';
 export function createDeck () {
 	const deck = Array(4).fill({ name: 'wild' }).map((wildCard, index) => ({ ...wildCard, id: `wild-${ index }` }));
 
-	[ 'red', 'green', 'yellow', 'blue' ]
+	[ 1, 2, 3, 4 ]
 		.forEach((color) => {
 			[ '1', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', '+1', '+2' ]
 				.forEach((name, index) => {

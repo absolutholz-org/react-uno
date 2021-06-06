@@ -1,0 +1,58 @@
+// .uno-card-back {
+// 	padding-bottom: calc((87 / 56) * 100%);
+// 	position: relative;
+
+// 	&::before {
+// 		background: conic-gradient(
+// 			#e00 10deg,
+// 			#0070ff 10deg 100deg,
+// 			#00a200 100deg 190deg,
+// 			#ffe300 190deg 280deg,
+// 			#e00 280deg
+// 		);
+// 		border-radius: 0.75rem;
+// 		bottom: 1rem;
+// 		content: "";
+// 		display: block;
+// 		left: 1rem;
+// 		position: absolute;
+// 		right: 1rem;
+// 		top: 1rem;
+// 	}
+
+// 	&::after {
+// 		background: #fff;
+// 		border-radius: 50%;
+// 		content: "";
+// 		display: block;
+// 		height: 80%;
+// 		left: 5%;
+// 		position: absolute;
+// 		top: 10%;
+// 		transform: skewX(-16deg);
+// 		width: 90%;
+// 	}
+
+// 	&__content {
+// 		align-items: center;
+// 		bottom: 1rem;
+// 		display: flex;
+// 		justify-content: center;
+// 		left: 1rem;
+// 		position: absolute;
+// 		right: 1rem;
+// 		top: 1rem;
+// 	}
+
+// 	&__center-text {
+// 		color: #111;
+// 		font: bold italic 17vw / 1 sans-serif;
+// 		text-align: center;
+// 		transform: rotate(-50deg);
+// 		z-index: 1;
+
+// 		@media (orientation: landscape) {
+// 			font-size: 8.5vw;
+// 		}
+// 	}
+// }

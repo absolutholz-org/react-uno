@@ -1,0 +1,34 @@
+
+.uno-card-placeholder {
+	background: #e4e4e4;
+	border-radius: 1rem;
+	padding-bottom: calc((87 / 56) * 100%);
+	position: relative;
+
+	&::before {
+		background: #fff;
+		border-radius: 0.75rem;
+
+		bottom: 1rem;
+		content: "";
+		display: block;
+		left: 1rem;
+		position: absolute;
+		right: 1rem;
+		top: 1rem;
+	}
+
+	&::after {
+		background: #e4e4e4;
+		border: 1rem solid #e4e4e4;
+		border-radius: 50%;
+		content: "";
+		display: block;
+		height: 80%;
+		left: 5%;
+		position: absolute;
+		top: 10%;
+		transform: skewX(-16deg);
+		width: 90%;
+	}
+}

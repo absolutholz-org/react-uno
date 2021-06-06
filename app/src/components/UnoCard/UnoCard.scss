@@ -1,25 +1,33 @@
-$yellow: #ffe300;
-$red: #e00;
-$blue: #0070ff;
-$green: #00a200;
-
-$spacing: 0.5rem;
-
 .uno-card {
-	background: #fff;
-	border-radius: 0.75rem;
-	display: block;
-	padding: 1rem;
-	flex: 0 0 200px;
+	$edge-thickness: 1rem;
+	$content-radius: 0.5rem;
+
+	--card-color-1: #0070ff;
+	--card-color-2: #00a200;
+	--card-color-3: #ffe300;
+	--card-color-4: #e00;
+
+	padding-bottom: (87 / 56) * 100%;
+	position: relative;
+	z-index: 0;
 
 	&__content {
-		border-radius: 0.5rem;
-
-		padding-bottom: calc((87 / 56) * 100%);
-		position: relative;
+		align-items: center;
+		background: black;
+		border-radius: $content-radius;
+		bottom: $edge-thickness;
+		display: flex;
+		justify-content: center;
+		left: $edge-thickness;
+		position: absolute;
+		right: $edge-thickness;
+		top: $edge-thickness;
+		z-index: 1;
 
 		&::before {
 			background: #fff;
+			border: 4px solid #fff;
+			border-radius: 50%;
 			content: "";
 			display: block;
 			width: 100%;
@@ -27,16 +35,17 @@ $spacing: 0.5rem;
 			position: absolute;
 			top: 8%;
 			transform: skewX(-16deg);
-			border-radius: 50%;
+			z-index: -1;
 		}
 
-		// > * {
-		// 	bottom: 0;
-		// 	left: 0;
-		// 	position: absolute;
-		// 	right: 0;
-		// 	top: 0;
-		// }
+
+	// 	// > * {
+	// 	// 	bottom: 0;
+	// 	// 	left: 0;
+	// 	// 	position: absolute;
+	// 	// 	right: 0;
+	// 	// 	top: 0;
+	// 	// }
 	}
 
 	&__symbol {
@@ -46,110 +55,140 @@ $spacing: 0.5rem;
 		position: absolute;
 		text-shadow:
 			-1px -1px #111,
-			1px -1px #111,
 			-1px 1px #111,
+			1px -1px #111,
+			1px 1px #111,
 			2px 2px #111;
 		transform: skewX(-10deg);
+		z-index: 2;
 
 		&--top {
-			left: $spacing;
-			top: $spacing;
+			left: $edge-thickness + $content-radius;
+			top: $edge-thickness + $content-radius;
 		}
 
 		&--bottom {
-			bottom: $spacing;
-			right: $spacing;
+			bottom: $edge-thickness + $content-radius;
+			right: $edge-thickness + $content-radius;
 		}
 
-		> svg {
-			height: 2rem;
-			width: 2rem;
+		// > svg {
+		// 	height: 2rem;
+		// 	width: 2rem;
 
-			path {
-				stroke-width: 10px;
-			}
+		// 	path {
+		// 		stroke-width: 10px;
+		// 	}
+		// }
+	}
+
+	&--color-all {
+		.uno-card__content {
+			background: conic-gradient(
+				var(--card-color-4) 10deg,
+				var(--card-color-1) 10deg 100deg,
+				var(--card-color-2) 100deg 190deg,
+				var(--card-color-3) 190deg 280deg,
+				var(--card-color-4) 280deg
+			);
 		}
 	}
 
-	&--red {
-		.card__content {
-			background: $red;
-		}
-	}
-
-	&--blue {
-		.card__content {
-			background: $blue;
-		}
-	}
-
-	&--green {
-		.card__content {
-			background: $green;
-		}
-	}
-
-	&--yellow {
-		.card__content {
-			background: $yellow;
-		}
-	}
-
-	&[data-value="skip"] {
-		.card__symbol {
-			font-size: 2.5rem;
-
-			&--top {
-				top: $spacing * 0.5;
-			}
-
-			&--bottom {
-				bottom: $spacing * 0.5;
+	@for $i from 1 through 4 {
+		&--color-#{ $i } {
+			.uno-card__content {
+				background: var(--card-color-#{ $i });
 			}
 		}
 	}
 
 	&--wild {
-		.card__content {
-			background: #111;
-
+		.uno-card__content {
 			&::before {
 				background: conic-gradient(
-					$blue 0 90deg,
-					$green 90deg 180deg,
-					$yellow 180deg 270deg,
-					$red 270deg
+					var(--card-color-1) 0 90deg,
+					var(--card-color-2) 90deg 180deg,
+					var(--card-color-3) 180deg 270deg,
+					var(--card-color-4) 270deg
 				);
-				border: 7px solid #fff;
-				content: "";
-			}
-		}
-
-		.card__symbol {
-			&::before {
-				background: conic-gradient(
-					$blue 0 90deg,
-					$green 90deg 180deg,
-					$yellow 180deg 270deg,
-					$red 270deg
-				);
-				border: 2px solid #fff;
-				border-radius: 50%;
-				content: "";
-				height: 2rem;
-				transform: skewX(-16deg);
-				width: calc((56 / 87) * 2rem);
-			}
-
-			&--top {
-				left: $spacing * 1.5;
-				top: $spacing * 1.25;
-			}
-
-			&--bottom {
-				bottom: $spacing * 1.25;
-				right: $spacing * 1.5;
 			}
 		}
 	}
+
+
+	// &--color-2 {
+	// 	.uno-card__content {
+	// 		background: var(--card-color-1);
+	// 	}
+	// }
+
+	// &--color-3 {
+	// 	.uno-card__content {
+	// 		background: var(--card-color-2);
+	// 	}
+	// }
+
+	// &--color-4 {
+	// 	.uno-card__content {
+	// 		background: var(--card-color-3);
+	// 	}
+	// }
+
+	// &[data-value="skip"] {
+	// 	.uno-card__symbol {
+	// 		font-size: 2.5rem;
+
+	// 		&--top {
+	// 			top: $spacing * 0.5;
+	// 		}
+
+	// 		&--bottom {
+	// 			bottom: $spacing * 0.5;
+	// 		}
+	// 	}
+	// }
+
+	// &--wild {
+	// 	.uno-card__content {
+	// 		background: #111;
+
+	// 		&::before {
+	// 			background: conic-gradient(
+	// 				$blue 0 90deg,
+	// 				$green 90deg 180deg,
+	// 				$yellow 180deg 270deg,
+	// 				$red 270deg
+	// 			);
+	// 			border: 7px solid #fff;
+	// 			content: "";
+	// 		}
+	// 	}
+
+	// 	.uno-card__symbol {
+	// 		&::before {
+	// 			background: conic-gradient(
+	// 				$blue 0 90deg,
+	// 				$green 90deg 180deg,
+	// 				$yellow 180deg 270deg,
+	// 				$red 270deg
+	// 			);
+	// 			border: 2px solid #fff;
+	// 			border-radius: 50%;
+	// 			content: "";
+	// 			height: 2rem;
+	// 			transform: skewX(-16deg);
+	// 			width: calc((56 / 87) * 2rem);
+	// 		}
+
+	// 		&--top {
+	// 			left: $spacing * 1.5;
+	// 			top: $spacing * 1.25;
+	// 		}
+
+	// 		&--bottom {
+	// 			bottom: $spacing * 1.25;
+	// 			right: $spacing * 1.5;
+	// 		}
+	// 	}
+	// }
 }
