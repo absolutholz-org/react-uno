@@ -15,7 +15,7 @@ const UnoCardFront = ({ cardType, cardColor }) => {
 	return (
 		<UnoCard
 			className={ `${ backgroundClass }${ typeClass }` }
-			content={ cardType }
+			// content={ cardType }
 		>
 			{ cardType !== 'wild' && cardType !== 'skip' &&
 				<span>{ cardType }</span>

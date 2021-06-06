@@ -1,12 +1,10 @@
 .uno-card {
-	$edge-thickness: 1rem;
-	$content-radius: 0.5rem;
-
 	--card-color-1: #0070ff;
 	--card-color-2: #00a200;
 	--card-color-3: #ffe300;
 	--card-color-4: #e00;
 
+	border-radius: calc(var(--card-width) * 0.05px);
 	padding-bottom: (87 / 56) * 100%;
 	position: relative;
 	z-index: 0;
@@ -14,14 +12,14 @@
 	&__content {
 		align-items: center;
 		background: black;
-		border-radius: $content-radius;
-		bottom: $edge-thickness;
+		border-radius: calc(var(--card-width) * 0.05px);
+		bottom: calc(var(--card-width) * 0.1px);
 		display: flex;
 		justify-content: center;
-		left: $edge-thickness;
+		left: calc(var(--card-width) * 0.1px);
 		position: absolute;
-		right: $edge-thickness;
-		top: $edge-thickness;
+		right: calc(var(--card-width) * 0.1px);
+		top: calc(var(--card-width) * 0.1px);
 		z-index: 1;
 
 		&::before {
@@ -42,7 +40,7 @@
 	&__symbol {
 		color: #fff;
 		display: flex;
-		font: bold 2rem / 1 sans-serif;
+		font: bold calc(var(--card-width) * 0.175px) / 1 sans-serif;
 		position: absolute;
 		text-shadow:
 			-1px -1px #111,
@@ -54,13 +52,13 @@
 		z-index: 2;
 
 		&--top {
-			left: $edge-thickness + $content-radius;
-			top: $edge-thickness + $content-radius;
+			left: calc(var(--card-width) * 0.15px);
+			top: calc(var(--card-width) * 0.15px);
 		}
 
 		&--bottom {
-			bottom: $edge-thickness + $content-radius;
-			right: $edge-thickness + $content-radius;
+			bottom: calc(var(--card-width) * 0.15px);
+			right: calc(var(--card-width) * 0.15px);
 		}
 
 		// > svg {

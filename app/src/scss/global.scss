@@ -2,3 +2,13 @@
 
 @use "./../abstracts/spacing";
 @use "./../abstracts/typography";
+
+// shame
+button {
+	background: none;
+	border: 0;
+	border-radius: 0;
+	display: inline-block;
+	padding: 0;
+	margin: 0;
+}

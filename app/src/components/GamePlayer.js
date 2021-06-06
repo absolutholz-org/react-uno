@@ -11,6 +11,7 @@ import { ACTION_DEAL, ACTION_GAME_START, ACTION_TURN_CHANGE, ACTION_GAME_END } f
 import PlayerPreviewList from './PlayerPreviewList';
 import UnoCardPiles from './UnoCardPiles';
 import VisuallyHidden from './VisuallyHidden';
+import PlayerCards from './PlayerCards/PlayerCards';
 
 const GameGuest = ({ name, id, gameChannel, players }) => {
 	const playerChannel = `${ gameChannel }-${ id }`;
@@ -31,10 +32,11 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 	const [ cardsToDraw, setCardsToDraw ] = useState(0);
 
 	function chooseColor () {
-		const colors = [ 'red', 'yellow', 'blue', 'green' ];
+		const colors = [ 'blue', 'green', 'yellow', 'red' ];
 		const color = prompt(`Choose a color: ${ colors.join(', ') }`);
-		if (colors.indexOf(color) > -1) {
-			return color;
+		const index = colors.indexOf(color);
+		if (index > -1) {
+			return index + 1;
 		} else {
 			return chooseColor();
 		}
@@ -249,21 +251,10 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 			</section>
 			<section>
 				<h3>Player Cards</h3>
-				<ul>
-					{
-						cards.map((card) => (
-							<li key={ card.id }>
-								<button
-									disabled={ !isCurrentPlayer || isPlayedCardsEmpty }
-									id={ card.id }
-									onClick={ () => onCardClicked(card) }
-								>
-									{ card.color } { card.name }
-								</button>
-							</li>
-						))
-					}
-				</ul>
+				<PlayerCards
+					cards={ cards }
+					onCardClicked={ onCardClicked }
+				/>
 			</section>
 			<section>
 				<h4>Players</h4>

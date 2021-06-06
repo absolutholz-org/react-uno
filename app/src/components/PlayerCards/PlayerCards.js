@@ -1,23 +1,32 @@
 // react dependencies
 import React from 'react';
 
-// external dependencies
-
-// internal scripts
-
 // internal components
+import UnoCardFront from './../UnoCardFront';
 
-const PlayerCards = ({ cards }) => {
+// styles
+import './PlayerCards.scss';
+
+const PlayerCards = ({ cards, onCardClicked }) => {
 	return (
-		<ol className="player-cards">
+		<ul className="player-cards">
 			{
 				cards.map((card) => (
 					<li key={ card.id }>
-						{ card.name }
+						<button
+							className="player-cards__button"
+							// disabled={ !isCurrentPlayer || isPlayedCardsEmpty }
+							onClick={ () => onCardClicked(card) }
+						>
+							<UnoCardFront
+								cardType={ card.name }
+								cardColor={ card.color }
+							/>
+						</button>
 					</li>
 				))
 			}
-		</ol>
+		</ul>
 	);
 };
 
