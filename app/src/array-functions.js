@@ -5,3 +5,11 @@ export function shuffle (array) {
 	}
 	return array;
 }
+
+// alternative
+// https://dev.to/techygeeky/top-20-javascript-tips-and-tricks-to-increase-your-speed-and-efficiency-283g
+// export function shuffle (array) {
+// 	return array.sort(() => {
+// 		return Math.random() - 0.5;
+// 	});
+// }
