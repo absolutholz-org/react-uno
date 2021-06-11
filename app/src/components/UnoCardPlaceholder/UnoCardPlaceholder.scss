@@ -2,7 +2,7 @@
 .uno-card-placeholder {
 	background: #e4e4e4;
 	border-radius: 1rem;
-	padding-bottom: calc((87 / 56) * 100%);
+	padding-bottom: 155%; // (87 / 56) * 100%
 	position: relative;
 
 	&::before {
