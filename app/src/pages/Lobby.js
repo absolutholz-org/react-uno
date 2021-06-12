@@ -1,6 +1,6 @@
 // react dependencies
 import React, { useState, useEffect } from 'react';
-import { useHistory } from "react-router-dom";
+import { useHistory, useLocation } from "react-router-dom";
 
 // external dependencies
 import { nanoid } from 'nanoid';
@@ -30,13 +30,13 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 	const [ lobbyChannel ] = useState(`uno-lobby-${ lobbyId }`);
 	const [ player, setPlayer ] = useState(null);
 	const [ players, setPlayers ] = useState([]);
-	const [ isCreator, setIsCreator ] = useState(false);
+	const isCreator = new URLSearchParams(useLocation().search).get('role') === 'host';
 	const history = useHistory();
 
 	const createPlayer = (event) => {
 		event.preventDefault();
-		const name = event.target.querySelector('#creator_name').value;
-		const id = event.target.querySelector('#creator_id').value;
+		const name = event.target.querySelector('#player_name').value;
+		const id = event.target.querySelector('#player_id').value;
 		const uuid = createUuid(name, id);
 		const player = {
 			name,
@@ -48,12 +48,13 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 	};
 
 	const inviteOpponent = () => {
+		const urlToShare = window.location.href.replace('?role=host', '');
 		if (navigator.share) {
 			navigator.share({
-				url: window.location.href,
+				url: urlToShare,
 			});
 		} else if (navigator.clipboard && navigator.clipboard.writeText) {
-			navigator.clipboard.writeText(window.location.href);
+			navigator.clipboard.writeText(urlToShare);
 		} else {
 			alert(`Share this room ID with your friend\r\n${lobbyId}`);
 		}
@@ -105,7 +106,7 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 						console.log(isCreator)
 						window.sessionStorage.setItem(`uno-game-player-id-${ message.message.channelId }`, player.uuid);
 						window.sessionStorage.setItem(`uno-game-config-${ message.message.channelId }`, JSON.stringify(message.message.config));
-						// window.sessionStorage.setItem(`uno-game-host-${ message.message.channelId }`, isCreator);
+						window.sessionStorage.setItem(`uno-game-host-${ message.message.channelId }`, isCreator);
 						history.push(`/game/${ message.message.channelId }`);
 					}
 				},
@@ -128,10 +129,6 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 				includeState: true,
 			}).then((response) => {
 				console.log('hereNow', { response });
-
-				if (response.totalOccupancy === 0) {
-					setIsCreator(true);
-				}
 
 				if (response.totalOccupancy < 4) {
 					response.channels[ lobbyChannel ].occupants
@@ -170,10 +167,10 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 		<LayoutWidthContainer>
 			{ !player &&
 				<form onSubmit={ createPlayer }>
-					<input id="creator_id" value={ nanoid(10) } type="hidden" />
-					<label htmlFor="creator_name">
+					<input id="player_id" value={ nanoid(10) } type="hidden" />
+					<label htmlFor="player_name">
 						<div>Name</div>
-						<input autoComplete="username" id="creator_name" maxLength="15" minLength="3" name="name" required type="text" />
+						<input autoComplete="username" id="player_name" maxLength="15" minLength="3" name="name" required type="text" />
 					</label>
 					<button type="submit">Create</button>
 				</form>

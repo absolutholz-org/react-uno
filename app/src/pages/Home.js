@@ -9,7 +9,7 @@ const Home = () => {
 	return (
 		<LayoutWidthContainer>
 			<h1>Home</h1>
-			<Link to={ `/lobby/${ nanoid(5) }` }>Create</Link>
+			<Link to={ `/lobby/${ nanoid(5) }?role=host` }>Create</Link>
 			<button>Join</button>
 		</LayoutWidthContainer>
 	);
