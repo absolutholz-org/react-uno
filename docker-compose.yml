@@ -17,5 +17,6 @@ services:
       # - /node_modules
     environment:
       - NODE_ENV=development
+      - SKIP_PREFLIGHT_CHECK=true
     command: ["yarn", "start" ]
     # command: ["tail", "-f", "/dev/null"]
