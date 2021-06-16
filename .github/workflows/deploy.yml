@@ -35,6 +35,9 @@ jobs:
           
       - name: Install packages
         run: yarn
+          
+      - name: Install packages
+        run: yarn add react-scripts
         
       - name: Compile source
         run: |
