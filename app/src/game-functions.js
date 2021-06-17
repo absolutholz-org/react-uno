@@ -1,13 +1,13 @@
-import { shuffle } from './array-functions';
-
-export function createDeck () {
-	const deck = Array(4).fill({ name: 'wild' }).map((wildCard, index) => ({ ...wildCard, id: `wild-${ index }` }));
+export function createDeckOfCards () {
+	const cards = Array(4)
+		.fill({ name: 'wild' })
+		.map((wildCard, index) => ({ ...wildCard, id: `wild-${ index }` }));
 
 	[ 1, 2, 3, 4 ]
 		.forEach((color) => {
 			[ '1', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'skip', '+1', '+2' ]
 				.forEach((name, index) => {
-					deck.push({
+					cards.push({
 						color,
 						name,
 						id: `${color}-${name}-${index}`
@@ -15,14 +15,14 @@ export function createDeck () {
 				});
 		});
 
-	return deck;
+	return cards;
 }
 
 export function shuffleCards (cards) {
-	return shuffle(cards);
+	return cards.sort(() => Math.random() - 0.5);
 }
 
-export function dealCards (playerCount, cards, cardsPerPlayer = 6) {
+export function dealCards (cards, playerCount = 2, cardsPerPlayer = 6) {
 	if (playerCount * cardsPerPlayer > cards.length) {
 		throw new Error(`Not enough cards (${ cards.length }) to give each player (${ playerCount }) ${ cardsPerPlayer } cards.`);
 	}
@@ -38,4 +38,16 @@ export function dealCards (playerCount, cards, cardsPerPlayer = 6) {
 		dealtCards,
 		remainingCards,
 	};
+}
+
+export function takeCardsFromDeck (cards, cardCount = 1) {
+	const cardsTaken = cards.splice(0, cardCount);
+	return {
+		remainingCards: cards,
+		cardsTaken
+	};
+}
+
+export function randomizePlayerOrder (players) {
+	return players.sort(() => Math.random() - 0.5);
 }

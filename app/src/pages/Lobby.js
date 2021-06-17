@@ -146,6 +146,7 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 				}
 			});
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ pubNub, lobbyChannel, history ]);
 
 	// Lobby is created; PubNub is available and player data has been entered => publish this information for other participants

@@ -16,6 +16,7 @@ const UnoCard = ({ children, className, content }) => {
 			// console.log(ref.current);
 			ref.current.parentNode.style.setProperty('--card-width', ref.current.offsetWidth);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ ref.current ]);
 
 	return (

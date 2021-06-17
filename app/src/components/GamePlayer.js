@@ -140,6 +140,7 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 			setCards((cards) => [ ...cards, ...takeCardFromDeck(cardsToDraw) ]);
 			setCardsToDraw(0);
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ cards, cardsToDraw ]);
 
 	useEffect(() => {
@@ -190,6 +191,7 @@ const GameGuest = ({ name, id, gameChannel, players }) => {
 		});
 
 		pubNub.subscribe({ channels: [ gameChannel, playerChannel ] });
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ pubNub, gameChannel, playerChannel ]);
 
 	function onCardClicked (card) {
