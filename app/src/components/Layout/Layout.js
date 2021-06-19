@@ -1,19 +1,9 @@
-import React from 'react';
-import { Link } from "react-router-dom";
+import styled from 'styled-components/macro';
 
-import { ReactComponent as SvgHome } from '@mdi/svg/svg/home.svg';
-
-import './Layout.scss';
-
-export const LayoutWidthContainer = ({ children }) => {
-	return (
-		<>
-			<header className="l-width-container">
-				<Link to="/">
-					<SvgHome />
-				</Link>
-			</header>
-			<main className="l-width-container">{ children }</main>
-		</>
-	);
-};
+export const LayoutWidthContainer = styled.div`
+	margin-left: auto;
+	margin-right: auto;
+	max-width: 1440px;
+	padding-left: 1rem;
+	padding-right: 1rem;
+`;
