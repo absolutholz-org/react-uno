@@ -53,11 +53,11 @@ const Game = ({ match: { params: { gameId } } }) => {
 	useEffect(() => {
 		swal({
 			button: false,
+			closeOnEsc: false,
+			closeOnClickOutside: false,
 			content: (
 				<div>Waiting for other players</div>
 			),
-			closeOnEsc: false,
-			closeOnClickOutside: false,
 		});
 	}, []);
 

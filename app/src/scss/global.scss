@@ -33,8 +33,13 @@ button {
 	background: var(--highlight);
 }
 
-
 .swal-content__input:focus, .swal-content__textarea:focus {
 	outline: none;
 	border-color: var(--highlight);
+}
+
+input {
+	display: block;
+	max-width: 100%;
+	width: 100%;
 }

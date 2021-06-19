@@ -11,7 +11,7 @@ export const TextButton = styled.button`
 	font: inherit;
 	font-size: 1.25rem;
 	font-weight: 500;
-	padding: 0.25em 2rem 0.3125em;
+	padding: 0.3125em 2rem;
 	text-align: center;
 	text-decoration: none;
 	text-transform: uppercase;

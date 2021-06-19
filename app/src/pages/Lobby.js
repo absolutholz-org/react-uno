@@ -5,16 +5,15 @@ import { useHistory, useLocation } from "react-router-dom";
 // external dependencies
 import { nanoid } from 'nanoid';
 import PubNub from 'pubnub';
+import swal from '@sweetalert/with-react';
 
 // internal components
 import { LayoutWidthContainer } from './../components/Layout';
 import LobbyPlayerList from './../components/LobbyPlayerList';
+import { ContainedButton } from './../components/Button';
+import CreatePlayerDialog from './../components/CreatePlayerDialog';
 
 const MESSAGE_START_GAME = 'start-game';
-
-function createUuid (name, id) {
-	return `${ name }||${ id }`;
-}
 
 export function objectifyUuid (uuid) {
 	const splitId = uuid.split('||');
@@ -32,20 +31,6 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 	const [ players, setPlayers ] = useState([]);
 	const isCreator = new URLSearchParams(useLocation().search).get('role') === 'host';
 	const history = useHistory();
-
-	const createPlayer = (event) => {
-		event.preventDefault();
-		const name = event.target.querySelector('#player_name').value;
-		const id = event.target.querySelector('#player_id').value;
-		const uuid = createUuid(name, id);
-		const player = {
-			name,
-			uuid,
-		};
-		console.log('create player', player);
-		setPlayer(player);
-		window.localStorage.setItem(`pubnub-player-id`, uuid);
-	};
 
 	const inviteOpponent = () => {
 		const urlToShare = window.location.href.replace('?role=host', '');
@@ -73,13 +58,6 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 				},
 			});
 	};
-
-	// useEffect(() => {
-	// 	let uuid = localStorage.getItem('pubnub_uuid');
-	// 	if (!uuid) {
-	// 		localStorage.setItem('pubnub_uuid', nanoid(32));
-	// 	}
-	// });
 
 	// after player is created => initialize PubNub
 	useEffect(() => {
@@ -154,39 +132,57 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 		if (pubNub && player) {
 			console.log('publish', { pubNub, player });
 			pubNub
-				.publish({
-					channel: lobbyChannel,
-					message: {
-						player,
-					},
-				});
-				// .then(() => setMessage(''));
+			.publish({
+				channel: lobbyChannel,
+				message: {
+					player,
+				},
+			});
+			// .then(() => setMessage(''));
 		}
 	}, [ pubNub, player, lobbyChannel ]);
 
+	useEffect(() => {
+		if (player === null) {
+			swal({
+				button: false,
+				closeOnEsc: false,
+				closeOnClickOutside: false,
+				content: (
+					<CreatePlayerDialog
+						setPlayer={ setPlayer }
+					/>
+				),
+			});
+		} else {
+			swal.close();
+		}
+	}, [ player ]);
+
 	return (
 		<LayoutWidthContainer>
-			{ !player &&
-				<form onSubmit={ createPlayer }>
-					<input id="player_id" value={ nanoid(10) } type="hidden" />
-					<label htmlFor="player_name">
-						<div>Name</div>
-						<input autoComplete="username" id="player_name" maxLength="15" minLength="3" name="name" required type="text" />
-					</label>
-					<button type="submit">Create</button>
-				</form>
-			}
+			<h1>Game lobby</h1>
 
 			{ isCreator &&
-				<div>You are the host</div>
+				<>
+					<p>You are the host.</p>
+					<p>When all players are present click the button below the list to start playing.</p>
+				</>
 			}
 
+			<ContainedButton
+				disabled={ players.length < 1 || players.length > 3 }
+				onClick={ inviteOpponent }
+			>Invite a friend</ContainedButton>
+			<ContainedButton
+				disabled={ !isCreator || players.length < 2 || players.length > 4 }
+				onClick={ startGame }
+			>Start the game</ContainedButton>
+
+			<h2>Players</h2>
 			{ players.length > 0 &&
 				<LobbyPlayerList players={ players } />
 			}
-
-			<button disabled={ players.length < 1 || players.length > 3 } onClick={ inviteOpponent }>Invite a friend</button>
-			<button disabled={ !isCreator || players.length < 2 || players.length > 4 } onClick={ startGame }>Start the game</button>
 
 		</LayoutWidthContainer>
 	);
