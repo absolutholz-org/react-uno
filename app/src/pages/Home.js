@@ -102,7 +102,6 @@ const Home = () => {
 			},
 		})
 		.then((value) => {
-			console.log({value});
 			if (value === null) {
 				return;
 			}
