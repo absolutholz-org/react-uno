@@ -22,7 +22,6 @@ const CreatePlayerForm = ({ setPlayer }) => {
 	// https://stackoverflow.com/questions/43817118/how-to-get-the-width-of-a-react-element
 	useEffect(() => {
 		if (ref.current && !isListeningForFieldEvents) {
-			console.log({ isListeningForFieldEvents });
 			ref.current.addEventListener('input', (event) => {
 				setIsFormInvalid(!ref.current.checkValidity());
 			});

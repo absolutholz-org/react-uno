@@ -154,13 +154,15 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 				<>
 					<p>You are the host.</p>
 					<p>When all players are present click the button below the list to start playing.</p>
+
+					<div>
+						<ContainedButton
+							disabled={ !isCreator || players.length < 2 || players.length > 4 }
+							onClick={ startGame }
+						>Start the game</ContainedButton>
+					</div>
 				</>
 			}
-
-			<ContainedButton
-				disabled={ !isCreator || players.length < 2 || players.length > 4 }
-				onClick={ startGame }
-			>Start the game</ContainedButton>
 
 			<h2>Players</h2>
 			<LobbyPlayerList
