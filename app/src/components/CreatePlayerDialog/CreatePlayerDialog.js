@@ -16,12 +16,13 @@ const CreatePlayerForm = ({ setPlayer }) => {
 	const ref = useRef(null);
 
 	const [ isFormInvalid, setIsFormInvalid ] = useState(true);
+	let isListeningForFieldEvents = false;
 
 	// Need to listen for event this wey because sweetalert seems to swallow the event otherwise
 	// https://stackoverflow.com/questions/43817118/how-to-get-the-width-of-a-react-element
 	useEffect(() => {
-		console.log(ref.current);
-		if (ref.current) {
+		if (ref.current && !isListeningForFieldEvents) {
+			console.log({ isListeningForFieldEvents });
 			ref.current.addEventListener('input', (event) => {
 				setIsFormInvalid(!ref.current.checkValidity());
 			});
@@ -39,29 +40,16 @@ const CreatePlayerForm = ({ setPlayer }) => {
 				window.localStorage.setItem(`pubnub-player-id`, uuid);
 				event.preventDefault();
 			});
+
+			// eslint-disable-next-line react-hooks/exhaustive-deps
+			isListeningForFieldEvents = true;
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [ ref.current ]);
-
-	// const createPlayer = (event) => {
-	// 	console.log({ event });
-	// 	event.preventDefault();
-	// 	const name = event.target.querySelector('#player_name').value;
-	// 	const id = event.target.querySelector('#player_id').value;
-	// 	const uuid = createUuid(name, id);
-	// 	const player = {
-	// 		name,
-	// 		uuid,
-	// 	};
-	// 	console.log('create player', player);
-	// 	setPlayer(player);
-	// 	window.localStorage.setItem(`pubnub-player-id`, uuid);
-	// };
+	}, []);
 
 	return (
 		<Dialog
 			as="form"
-			// onSubmit={ createPlayer }
 			ref={ ref }
 		>
 			<DialogHeader

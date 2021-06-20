@@ -32,19 +32,6 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 	const isCreator = new URLSearchParams(useLocation().search).get('role') === 'host';
 	const history = useHistory();
 
-	const inviteOpponent = () => {
-		const urlToShare = window.location.href.replace('?role=host', '');
-		if (navigator.share) {
-			navigator.share({
-				url: urlToShare,
-			});
-		} else if (navigator.clipboard && navigator.clipboard.writeText) {
-			navigator.clipboard.writeText(urlToShare);
-		} else {
-			alert(`Share this room ID with your friend\r\n${lobbyId}`);
-		}
-	};
-
 	const startGame = () => {
 		pubNub
 			.publish({
@@ -171,18 +158,15 @@ const Lobby = ({ match: { params: { lobbyId } } }) => {
 			}
 
 			<ContainedButton
-				disabled={ players.length < 1 || players.length > 3 }
-				onClick={ inviteOpponent }
-			>Invite a friend</ContainedButton>
-			<ContainedButton
 				disabled={ !isCreator || players.length < 2 || players.length > 4 }
 				onClick={ startGame }
 			>Start the game</ContainedButton>
 
 			<h2>Players</h2>
-			{ players.length > 0 &&
-				<LobbyPlayerList players={ players } />
-			}
+			<LobbyPlayerList
+				lobbyId={ lobbyId}
+				players={ players }
+			/>
 
 		</LayoutWidthContainer>
 	);
