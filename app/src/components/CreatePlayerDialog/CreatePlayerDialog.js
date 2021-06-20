@@ -1,5 +1,5 @@
 // react dependencies
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 
 // external dependencies
 import { nanoid } from 'nanoid';
@@ -15,11 +15,17 @@ function createUuid (name, id) {
 const CreatePlayerForm = ({ setPlayer }) => {
 	const ref = useRef(null);
 
+	const [ isFormInvalid, setIsFormInvalid ] = useState(true);
+
 	// Need to listen for event this wey because sweetalert seems to swallow the event otherwise
 	// https://stackoverflow.com/questions/43817118/how-to-get-the-width-of-a-react-element
 	useEffect(() => {
 		console.log(ref.current);
 		if (ref.current) {
+			ref.current.addEventListener('input', (event) => {
+				setIsFormInvalid(!ref.current.checkValidity());
+			});
+
 			ref.current.addEventListener('submit', (event) => {
 				const name = event.target.querySelector('#player_name').value;
 				const id = event.target.querySelector('#player_id').value;
@@ -85,6 +91,7 @@ const CreatePlayerForm = ({ setPlayer }) => {
 
 			<DialogFooter>
 				<ContainedButton
+					disabled={ isFormInvalid }
 					type="submit"
 					>Join the game</ContainedButton>
 			</DialogFooter>

@@ -24,6 +24,10 @@ export const TextButton = styled.button`
 			`
 			: css``
 	}
+
+	&:disabled {
+		opacity: 0.5;
+	}
 `;
 
 export const OutlinedButton = styled(TextButton)`
